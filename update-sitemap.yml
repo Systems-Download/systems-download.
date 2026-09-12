@@ -1,0 +1,42 @@
+name: Update sitemap.xml
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'sitemap.xml'   # avoid infinite loop when the bot commits the sitemap itself
+  schedule:
+    # Runs once a day at 06:00 UTC, so the sitemap also picks up new
+    # GitHub Releases even on days nobody touches the site's source.
+    - cron: '0 6 * * *'
+  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update-sitemap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate sitemap.xml
+        run: python3 .github/scripts/generate_sitemap.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "sitemap-bot"
+          git config user.email "actions@github.com"
+          if ! git diff --quiet sitemap.xml; then
+            git add sitemap.xml
+            git commit -m "chore: auto-update sitemap.xml"
+            git push
+          else
+            echo "sitemap.xml unchanged — nothing to commit"
+          fi
