@@ -94,6 +94,48 @@
   /* LEGAL / CLARITY */
   .legal-band{max-width:900px;margin:0 auto;padding:0 2.5rem 6rem}
 
+  /* SNEAK PEEKS PREVIEW */
+  .peeks-band{max-width:1000px;margin:0 auto;padding:0 2.5rem 6rem}
+  .peeks-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+  .peek-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .peek-img{width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--surface2);display:block}
+  .peek-body{padding:1rem 1.1rem}
+  .peek-title{font-weight:700;font-size:.9rem;margin-bottom:.3rem}
+  .peek-desc{font-family:var(--mono);font-size:.75rem;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .peeks-more{text-align:center;margin-top:1.5rem}
+  .peeks-more a{color:var(--conch);text-decoration:none;font-family:var(--mono);font-size:.82rem}
+  .peeks-more a:hover{text-decoration:underline}
+  .peeks-empty{text-align:center;font-family:var(--mono);font-size:.82rem;color:var(--muted);opacity:.6;padding:2rem;grid-column:1/-1}
+
+  /* RECENT ACTIVITY */
+  .activity-band{max-width:800px;margin:0 auto;padding:0 2.5rem 6rem}
+  .activity-item{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:.7rem}
+  .activity-icon{width:34px;height:34px;border-radius:9px;background:rgba(15,244,198,.1);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+  .activity-body{flex:1;min-width:0}
+  .activity-title{font-weight:700;font-size:.88rem;margin-bottom:.2rem}
+  .activity-text{font-family:var(--mono);font-size:.76rem;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .activity-time{font-family:var(--mono);font-size:.65rem;color:var(--muted);opacity:.6;margin-top:.3rem}
+  .activity-empty{text-align:center;font-family:var(--mono);font-size:.82rem;color:var(--muted);opacity:.6;padding:2rem}
+  .activity-more{text-align:center;margin-top:1rem}
+  .activity-more a{color:var(--conch);text-decoration:none;font-family:var(--mono);font-size:.82rem}
+  .activity-more a:hover{text-decoration:underline}
+
+  /* FOOTER */
+  .site-footer{border-top:1px solid var(--border);padding:3.5rem 2.5rem 2rem}
+  .footer-grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:2rem;margin-bottom:2.5rem}
+  .footer-brand-logo{font-size:1.1rem;font-weight:700;display:flex;gap:.4em;margin-bottom:.6rem}
+  .footer-brand-logo .c{color:var(--conch)}.footer-brand-logo .r{color:var(--cmdr)}.footer-brand-logo .sep{color:var(--muted)}
+  .footer-brand p{font-family:var(--mono);font-size:.76rem;color:var(--muted);line-height:1.7;max-width:240px}
+  .footer-col h4{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem}
+  .footer-col a{display:block;color:var(--text);text-decoration:none;font-family:var(--mono);font-size:.8rem;margin-bottom:.6rem;opacity:.8;transition:opacity .2s}
+  .footer-col a:hover{opacity:1;color:var(--conch)}
+  .footer-bottom{max-width:1000px;margin:0 auto;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--muted);opacity:.6}
+
+  @media(max-width:768px){
+    .footer-grid{grid-template-columns:1fr 1fr}
+    .peeks-grid{grid-template-columns:1fr}
+  }
+
   /* QUIZ */
   .quiz-band{max-width:700px;margin:0 auto;padding:0 2.5rem 6rem}
   .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:2rem;text-align:center}
@@ -334,6 +376,28 @@
   </div>
 </div>
 
+<div class="peeks-band">
+  <div class="features-head">
+    <h2>Sneak Peeks</h2>
+    <p>A first look at what's coming next</p>
+  </div>
+  <div id="peeks-grid" class="peeks-grid">
+    <div class="peeks-empty">Loading previews...</div>
+  </div>
+  <div class="peeks-more"><a href="sneakpeeks.html">See all sneak peeks →</a></div>
+</div>
+
+<div class="activity-band">
+  <div class="features-head">
+    <h2>Recent Activity</h2>
+    <p>What's been happening lately</p>
+  </div>
+  <div id="activity-list">
+    <div class="activity-empty">Loading announcements...</div>
+  </div>
+  <div class="activity-more"><a href="announcements.html">See all announcements →</a></div>
+</div>
+
 <div class="compare-band">
   <div class="features-head">
     <h2>Compare the tools</h2>
@@ -409,7 +473,32 @@
   </div>
 </div>
 
-<footer>Conch & Cmdr — Free Roblox admin tools by Systems-Download</footer>
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-brand-logo"><span class="c">Conch</span><span class="sep">/</span><span class="r">Cmdr</span></div>
+      <p>Free Roblox admin tools and command systems, built by Systems-Download since February 2026.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="download.html">Downloads</a>
+      <a href="changelog.html">Changelog</a>
+      <a href="sneakpeeks.html">Sneak Peeks</a>
+      <a href="status.html">Status</a>
+    </div>
+    <div class="footer-col">
+      <h4>Community</h4>
+      <a href="announcements.html">Announcements</a>
+      <a href="https://discord.gg/6zxpMDbecq" target="_blank" rel="noopener">Discord</a>
+      <a href="bugreport.html">Report a Bug</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="faq.html">FAQ &amp; Usage Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Systems-Download — Conch &amp; Cmdr build on the open-source Conch and Cmdr engines (MIT licensed). Sentinel is fully original.</div>
+</footer>
 
 <script>
 try{
@@ -551,6 +640,77 @@ function restartQuiz() {
 }
 
 renderQuizQuestion();
+
+/* ── SNEAK PEEKS PREVIEW ── */
+(async function(){
+  const SB_URL='https://rmdkoauibmzhgnvrwhfd.supabase.co';
+  const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+  function eh(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/cc_sneakpeeks?select=*&order=created_at.desc&limit=3`,{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    });
+    const grid=document.getElementById('peeks-grid');
+    if(!r.ok)throw new Error('fetch failed');
+    const rows=await r.json();
+    if(!rows||!rows.length){
+      grid.innerHTML='<div class="peeks-empty">No sneak peeks yet — check back soon! 👀</div>';
+      return;
+    }
+    grid.innerHTML=rows.map(p=>`
+      <div class="peek-card">
+        <img class="peek-img" src="${eh(p.image_url)}" alt="${eh(p.title)}" loading="lazy">
+        <div class="peek-body">
+          <div class="peek-title">${eh(p.title)}</div>
+          <div class="peek-desc">${eh(p.description||'')}</div>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    const grid=document.getElementById('peeks-grid');
+    if(grid)grid.innerHTML='<div class="peeks-empty">Couldn\'t load previews right now.</div>';
+  }
+})();
+
+/* ── RECENT ACTIVITY (Announcements) ── */
+(async function(){
+  const SB_URL='https://rmdkoauibmzhgnvrwhfd.supabase.co';
+  const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+  function eh(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function timeAgo(s){
+    const diff=(Date.now()-new Date(s))/1000;
+    if(diff<3600)return Math.floor(diff/60)+'m ago';
+    if(diff<86400)return Math.floor(diff/3600)+'h ago';
+    if(diff<604800)return Math.floor(diff/86400)+'d ago';
+    return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
+  const TYPE_ICON={info:'ℹ️',update:'🚀',hotfix:'🔧',warning:'⚠️'};
+
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/cc_announcements?select=*&order=created_at.desc&limit=3&active=eq.true`,{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    });
+    const list=document.getElementById('activity-list');
+    if(!r.ok)throw new Error('fetch failed');
+    const rows=await r.json();
+    if(!rows||!rows.length){
+      list.innerHTML='<div class="activity-empty">No recent activity yet.</div>';
+      return;
+    }
+    list.innerHTML=rows.map(a=>`
+      <div class="activity-item">
+        <div class="activity-icon">${TYPE_ICON[a.type]||'📢'}</div>
+        <div class="activity-body">
+          <div class="activity-title">${eh(a.title)}</div>
+          <div class="activity-text">${eh(a.message)}</div>
+          <div class="activity-time">${timeAgo(a.created_at)}</div>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    const list=document.getElementById('activity-list');
+    if(list)list.innerHTML='<div class="activity-empty">Couldn\'t load recent activity right now.</div>';
+  }
+})();
 </script>
 </body>
 </html>
