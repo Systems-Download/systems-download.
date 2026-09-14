@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conch & Cmdr — Downloads</title>
+<meta name="description" content="Download the latest Conch, Cmdr, and Sentinel releases for Roblox — free admin tools and command systems, updated regularly.">
 <div class="page-transition" id="page-transition"></div>
 
 
@@ -749,6 +750,16 @@
   .addfriend-result:hover{border-color:rgba(167,139,250,.3)}
   .addfriend-close-btn{width:100%;font-family:var(--mono);font-size:.78rem;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .2s}
   .addfriend-close-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+
+  /* Respect OS-level "reduce motion" accessibility setting automatically */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 
 <script>
@@ -1685,7 +1696,7 @@ function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...
     <button class="icon-btn" id="refresh-btn" onclick="doRefresh()" title="Refresh">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
-    <button class="burger" id="burger-btn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
+    <button class="burger" id="burger-btn" onclick="toggleDrawer()" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -1743,7 +1754,7 @@ function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...
     <div class="discord-title">Join the Conch & Cmdr Discord</div>
     <div class="discord-sub">Get updates, support, and talk to the community</div>
   </div>
-  <a class="discord-btn" href="https://discord.gg/XaZSGVFvzV" target="_blank" rel="noopener">Join Server →</a>
+  <a class="discord-btn" href="https://discord.gg/6zxpMDbecq" target="_blank" rel="noopener">Join Server →</a>
 </div>
 
 <!-- DOWNLOAD QUEUE FAB -->
@@ -2016,8 +2027,38 @@ function addRipple(btn,cls){
 }
 
 /* ── DOWNLOAD (requires auth) ── */
+/* ── DOWNLOAD LOGGING ── */
+/* Records every download attempt (user, IP, file, timestamp) to
+   cc_download_log. This does NOT block anything — it's purely for
+   visibility, e.g. spotting if a banned account/IP still managed to
+   trigger a download somehow, so it can be looked into. */
+async function logDownload(fileName,fileType,fileUrl){
+  try{
+    const ip=await getIP();
+    let wasBannedAtTime=false;
+    try{
+      const banCheck=await checkBan(ip);
+      wasBannedAtTime=!!banCheck;
+    }catch{}
+    await sbFetch('/rest/v1/cc_download_log',{
+      method:'POST',headers:{'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        user_id:AUTH.user.id||null,
+        username:AUTH.user.username||'unknown',
+        ip,
+        file_name:fileName,
+        file_type:fileType,
+        file_url:fileUrl,
+        was_banned_at_time:wasBannedAtTime,
+        downloaded_at:new Date().toISOString()
+      })
+    }).catch(()=>{});
+  }catch{}
+}
+
 function dl(url,name,type,btn){
   if(!AUTH.user){toast({title:'Login required',sub:'Please log in to download files',type:'w',dur:3000});return;}
+  logDownload(name,type,url);
   addRipple(btn,'ripple-'+type);
   const itemEl=btn.closest('.file-item');
   const progWrap=itemEl?itemEl.querySelector('.dl-progress-wrap'):null;
@@ -3945,7 +3986,7 @@ function startIntro(seenKey){
         </div>`).join('')}</div>`;
     }
     if(s.discord){
-      extra=`<a class="intro-discord-btn" href="https://discord.gg/XaZSGVFvzV" target="_blank" rel="noopener">💬 Join the Discord</a>`;
+      extra=`<a class="intro-discord-btn" href="https://discord.gg/6zxpMDbecq" target="_blank" rel="noopener">💬 Join the Discord</a>`;
     }
     return `<div class="intro-slide${i===0?' active':''}" data-slide="${i}">
       <div class="intro-icon" style="background:${s.iconBg};color:${s.iconColor}">${s.icon}</div>
