@@ -785,6 +785,7 @@
 })();
 </script>
 <script src="i18n.js"></script>
+<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 </head>
 <body>
 
@@ -1163,7 +1164,8 @@ async function sendVerificationEmail(email,displayName){
         to:[email],
         subject:'✅ Verify your Conch & Cmdr account',
         html:`
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+</head>
 <body style="margin:0;padding:0;background:#0b0c0f;font-family:'Courier New',monospace">
   <div style="max-width:560px;margin:40px auto;background:#13151a;border:1px solid rgba(255,255,255,0.07);border-radius:16px;overflow:hidden">
     <div style="padding:2rem;text-align:center;border-bottom:1px solid rgba(255,255,255,0.07);background:linear-gradient(135deg,rgba(15,244,198,0.06),rgba(15,244,198,0.01))">
