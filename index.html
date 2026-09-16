@@ -238,6 +238,8 @@
   }
 }
 </script>
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
 </head>
 <body>
 
@@ -469,7 +471,7 @@
       <h3>Join the Discord</h3>
       <p>Get support, updates, and talk to the community</p>
     </div>
-    <a href="https://discord.gg/6zxpMDbecq" target="_blank" rel="noopener" class="discord-btn">Join Server →</a>
+    <a href="https://discord.gg/6zxpMDbecq" data-cc-discord target="_blank" rel="noopener" class="discord-btn">Join Server →</a>
   </div>
 </div>
 
@@ -489,7 +491,7 @@
     <div class="footer-col">
       <h4>Community</h4>
       <a href="announcements.html">Announcements</a>
-      <a href="https://discord.gg/6zxpMDbecq" target="_blank" rel="noopener">Discord</a>
+      <a href="https://discord.gg/6zxpMDbecq" data-cc-discord target="_blank" rel="noopener">Discord</a>
       <a href="bugreport.html">Report a Bug</a>
     </div>
     <div class="footer-col">
@@ -516,7 +518,7 @@ try{
 (async function(){
   /* Total releases from GitHub */
   try{
-    const r=await fetch('https://api.github.com/repos/Systems-Download/Systems-Download.github.io/releases?per_page=100');
+    const r=await fetch(`https://api.github.com/repos/${window.CC_CONFIG.GITHUB_REPO}/releases?per_page=100`);
     if(r.ok){
       const releases=await r.json();
       const el=document.getElementById('stat-releases');
@@ -525,11 +527,12 @@ try{
   }catch{
     const el=document.getElementById('stat-releases');
     if(el)el.textContent='—';
+    if(window.CCErrors)CCErrors.report('release stats');
   }
 
   /* Discord member count via public invite info — no auth needed */
   try{
-    const r=await fetch('https://discord.com/api/v10/invites/6zxpMDbecq?with_counts=true');
+    const r=await fetch(`https://discord.com/api/v10/invites/${window.CC_CONFIG.DISCORD_INVITE_CODE}?with_counts=true`);
     if(r.ok){
       const data=await r.json();
       const el=document.getElementById('stat-discord');
@@ -538,6 +541,7 @@ try{
   }catch{
     const el=document.getElementById('stat-discord');
     if(el)el.textContent='—';
+    if(window.CCErrors)CCErrors.report('Discord stats');
   }
 })();
 
@@ -643,8 +647,8 @@ renderQuizQuestion();
 
 /* ── SNEAK PEEKS PREVIEW ── */
 (async function(){
-  const SB_URL='https://rmdkoauibmzhgnvrwhfd.supabase.co';
-  const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+  const SB_URL=window.CC_CONFIG.SB_URL;
+  const SB_KEY=window.CC_CONFIG.SB_KEY;
   function eh(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
   try{
@@ -668,14 +672,15 @@ renderQuizQuestion();
       </div>`).join('');
   }catch(e){
     const grid=document.getElementById('peeks-grid');
-    if(grid)grid.innerHTML='<div class="peeks-empty">Couldn\'t load previews right now.</div>';
+    if(grid)grid.innerHTML='<div class="peeks-empty">Unavailable right now.</div>';
+    if(window.CCErrors)CCErrors.report('Sneak Peeks');
   }
 })();
 
 /* ── RECENT ACTIVITY (Announcements) ── */
 (async function(){
-  const SB_URL='https://rmdkoauibmzhgnvrwhfd.supabase.co';
-  const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+  const SB_URL=window.CC_CONFIG.SB_URL;
+  const SB_KEY=window.CC_CONFIG.SB_KEY;
   function eh(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   function timeAgo(s){
     const diff=(Date.now()-new Date(s))/1000;
@@ -708,7 +713,8 @@ renderQuizQuestion();
       </div>`).join('');
   }catch(e){
     const list=document.getElementById('activity-list');
-    if(list)list.innerHTML='<div class="activity-empty">Couldn\'t load recent activity right now.</div>';
+    if(list)list.innerHTML='<div class="activity-empty">Unavailable right now.</div>';
+    if(window.CCErrors)CCErrors.report('Recent Activity');
   }
 })();
 </script>
