@@ -96,6 +96,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
   }
 </style>
 <script src="i18n.js"></script>
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
 </head>
 <body>
 
@@ -564,8 +566,8 @@ function applyPrivacy(){
 }
 
 /* ── CONNECTED ACCOUNTS ── */
-const SB_URL_CA='https://rmdkoauibmzhgnvrwhfd.supabase.co';
-const SB_KEY_CA='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+const SB_URL_CA=window.CC_CONFIG.SB_URL;
+const SB_KEY_CA=window.CC_CONFIG.SB_KEY;
 
 async function loadConnectedAccounts(){
   try{
@@ -695,8 +697,8 @@ function clearNotifHistory(){
 }
 
 /* ── DELETE ACCOUNT ── */
-const SB_URL_DA='https://rmdkoauibmzhgnvrwhfd.supabase.co';
-const SB_KEY_DA='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+const SB_URL_DA=window.CC_CONFIG.SB_URL;
+const SB_KEY_DA=window.CC_CONFIG.SB_KEY;
 
 function openDeleteAccountModal(){
   const auth=JSON.parse(localStorage.getItem('cc_auth')||'{}');
