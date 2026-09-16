@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FAQ — Conch & Cmdr</title>
+<meta name="description" content="Frequently asked questions about Conch, Cmdr, and Sentinel — downloads, safety, licensing, and support.">
 <div class="page-transition" id="page-transition"></div>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -118,6 +119,8 @@ footer{text-align:center;padding:3rem 2rem;font-family:var(--mono);font-size:.7r
     }
   }
 </style>
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
 </head>
 <body>
 
@@ -127,7 +130,7 @@ footer{text-align:center;padding:3rem 2rem;font-family:var(--mono);font-size:.7r
     <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">
       <span class="theme-icon" id="theme-icon">🌙</span>
     </button>
-    <button class="burger" id="burger-btn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
+    <button class="burger" id="burger-btn" onclick="toggleDrawer()" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -243,7 +246,7 @@ const FAQ = [
   {
     cat: '💬 Community',
     items: [
-      { icon: '💬', q: 'Where can I get support?', a: 'Join the <a href="https://discord.gg/XaZSGVFvzV" target="_blank">Discord server</a> for direct support, announcements and community discussion.' },
+      { icon: '💬', q: 'Where can I get support?', a: 'Join the <a href="https://discord.gg/6zxpMDbecq" target="_blank">Discord server</a> for direct support, announcements and community discussion.' },
       { icon: '🐛', q: 'How do I report a bug?', a: 'Go on https://systems-download.github.io/bugreport.html or open a ticket in the Discord server support channel.' },
       { icon: '💡', q: 'Can I suggest features?', a: 'Absolutely! Post your ideas in the Discord server. We read all suggestions. The Creator or the Co Creators will check your Ideas and will insert it if possible.' },
     ]
