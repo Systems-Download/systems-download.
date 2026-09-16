@@ -5,6 +5,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conch & Cmdr — Bug Report</title>
+<meta name="description" content="Report a bug for Conch, Cmdr, or Sentinel — sent directly to our Discord for fast fixes.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -175,6 +176,8 @@ footer{text-align:center;padding:3rem 2rem;font-family:var(--mono);font-size:.72
 })();
 </script>
 <script src="i18n.js"></script>
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
 </head>
 <body>
 
@@ -329,9 +332,9 @@ footer{text-align:center;padding:3rem 2rem;font-family:var(--mono);font-size:.72
 
 <script>
 /* ── CONFIG ── */
-const DISCORD_WEBHOOK='https://discord.com/api/webhooks/1510446146458353747/pnX8TWoZRQsPb9zK5UY5XK1jET80JB9r-DvafMdDVAauLRKCCvGPUha_SvkmtLcoG31p';
-const SB_URL='https://rmdkoauibmzhgnvrwhfd.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+const DISCORD_WEBHOOK=window.CC_CONFIG.DISCORD_WEBHOOK;
+const SB_URL=window.CC_CONFIG.SB_URL;
+const SB_KEY=window.CC_CONFIG.SB_KEY;
 
 /* ── STATE ── */
 let selectedCat='download';
