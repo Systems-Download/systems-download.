@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Announcements — Conch & Cmdr</title>
+<meta name="description" content="Latest news, updates, and announcements for Conch & Cmdr Roblox admin tools.">
 <div class="page-transition" id="page-transition"></div>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -163,13 +164,15 @@
     }
   }
 </style>
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
 </head>
 <body>
 
 <!-- CONFIG -->
 <script>
-const SUPA_URL  = 'https://rmdkoauibmzhgnvrwhfd.supabase.co';
-const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+const SUPA_URL  = window.CC_CONFIG.SB_URL;
+const SUPA_ANON = window.CC_CONFIG.SB_KEY;
 
 /* FALLBACK — shown if Supabase is unreachable */
 const FALLBACK_ANNOUNCEMENTS = [
