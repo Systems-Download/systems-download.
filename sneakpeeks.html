@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sneak Peeks — Conch & Cmdr</title>
+<meta name="description" content="Sneak peeks at upcoming features and updates for Conch, Cmdr, and Sentinel.">
 
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -134,6 +135,16 @@
   @media(max-width:640px){
     nav{padding:1rem 1.2rem}.hero{padding:8rem 1.2rem 2rem}.peeks-wrap{padding-left:1.2rem;padding-right:1.2rem}
   }
+
+  /* Respect OS-level "reduce motion" accessibility setting automatically */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 <script>
 (function(){
@@ -145,6 +156,8 @@
   if(accent&&accent!=='#0ff4c6')document.documentElement.style.setProperty('--conch',accent);
 })();
 </script>
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
 </head>
 <body>
 
@@ -167,7 +180,7 @@
   <div class="nav-right">
     <button class="add-btn" id="add-peek-btn" onclick="openAddModal()">➕ Add Sneak Peek</button>
     <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
-    <button class="burger" id="burger-btn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
+    <button class="burger" id="burger-btn" onclick="toggleDrawer()" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -231,11 +244,7 @@
 </div>
 
 <script>
-const CONFIG={
-  SB_URL:'https://rmdkoauibmzhgnvrwhfd.supabase.co',
-  SB_KEY:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw',
-  PEEKS_BUCKET:'sneak-peeks'
-};
+const CONFIG = window.CC_CONFIG || {};
 
 function sbFetch(path,opts={}){
   const method=(opts.method||'GET').toUpperCase();
