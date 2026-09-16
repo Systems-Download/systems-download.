@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conch & Cmdr — Admin Panel</title>
+<meta name="description" content="Restricted admin control panel for Conch & Cmdr.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -172,6 +173,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
     }
   }
 </style>
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
 </head>
 <body>
 
@@ -1037,9 +1040,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
 <script>
 /* ── CONFIG ── */
-const SB_URL='https://rmdkoauibmzhgnvrwhfd.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
-const ADMIN_USERNAME='max';
+const SB_URL=window.CC_CONFIG.SB_URL;
+const SB_KEY=window.CC_CONFIG.SB_KEY;
+const ADMIN_USERNAME=window.CC_CONFIG.ADMIN_USERNAME;
 
 /* ══════════════════════════════════════
    OWNER LOGIN — same one-time command as download.html.
