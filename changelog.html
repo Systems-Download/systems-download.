@@ -412,7 +412,8 @@ async function fetchReleases(){
     renderAll();
   }catch(e){
     ['skel1','skel2','skel3','skel4'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
-    document.getElementById('timeline').innerHTML=`<div class="state-msg"><span class="state-msg-icon">❌</span>Failed to load releases: ${eh(e.message)}</div>`;
+    document.getElementById('timeline').innerHTML=`<div class="state-msg"><span class="state-msg-icon">❌</span>Releases unavailable right now.</div>`;
+    if(window.CCErrors)CCErrors.report('release history');
   }
 }
 
