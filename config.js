@@ -65,7 +65,7 @@ window.CC_CONFIG = {
      TYPE: 'info' | 'success' | 'warning' | 'danger' */
   SITE_BANNER: {
     ENABLED: true,
-    TEXT: 'Site Maintenance in 8h! It will last till 1PM, GMT+2',
+    TEXT: 'Site Maintenance in 7h! It will last till 1PM, GMT+2',
     TYPE: 'warning',
   },
 
