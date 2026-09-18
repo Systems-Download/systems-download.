@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K1NG ESPORTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #00b4ff;
+    --blue-dim: #0077aa;
+    --blue-dark: #003355;
+    --white: #ffffff;
+    --grey: #8899aa;
+    --bg: #040d18;
+    --bg2: #060f1e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ─── SCROLLBAR ─────────────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #020810; }
+  ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 2px; }
+
+  /* ─── NAV ───────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px;
+    height: 56px;
+    background: rgba(4, 13, 24, 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0,180,255,0.12);
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 22px; letter-spacing: 2px;
+    color: var(--white); text-decoration: none;
+  }
+  .nav-logo .crown-icon {
+    width: 28px; height: 28px;
+    filter: drop-shadow(0 0 8px var(--blue));
+  }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 600; letter-spacing: 2px;
+    color: var(--grey); text-decoration: none;
+    text-transform: uppercase;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--blue); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .online-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--grey);
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
+  }
+  .online-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
+    animation: pulse-green 2s ease-in-out infinite;
+  }
+  @keyframes pulse-green {
+    0%,100% { opacity:1; box-shadow:0 0 8px #00ff88; }
+    50% { opacity:.6; box-shadow:0 0 16px #00ff88; }
+  }
+  .btn-discord {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    color: var(--bg); background: var(--blue);
+    border: none; padding: 8px 18px;
+    cursor: pointer; text-transform: uppercase;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: background .2s, box-shadow .2s;
+  }
+  .btn-discord:hover {
+    background: #fff;
+    box-shadow: 0 0 24px rgba(0,180,255,.6);
+  }
+
+  /* ─── DEPTH INDICATOR ───────────────────────────── */
+  .depth-bar {
+    position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+    z-index: 500; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .depth-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px; letter-spacing: 3px; color: var(--grey);
+    writing-mode: vertical-rl; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .depth-track {
+    width: 2px; height: 200px;
+    background: rgba(0,180,255,0.15);
+    position: relative; border-radius: 1px;
+  }
+  .depth-fill {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--blue);
+    box-shadow: 0 0 8px var(--blue);
+    transition: height .3s ease;
+    border-radius: 1px;
+  }
+  .depth-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue);
+    box-shadow: 0 0 10px var(--blue);
+    position: absolute; left: 50%; transform: translateX(-50%);
+    transition: bottom .3s ease;
+  }
+  .depth-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; letter-spacing: 2px; color: var(--blue);
+    margin-top: 8px;
+  }
+
+  /* ─── CANVAS (particles) ────────────────────────── */
+  #bg-canvas {
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ─── HERO ──────────────────────────────────────── */
+  .hero {
+    position: relative; z-index: 10;
+    height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .hero-scene {
+    position: relative;
+    width: 500px; height: 500px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Orbit rings */
+  .orbit {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(0,180,255,0.3);
+    animation: spin linear infinite;
+  }
+  .orbit-1 { width: 320px; height: 120px; animation-duration: 8s; border-color: rgba(0,180,255,0.4); }
+  .orbit-2 { width: 420px; height: 160px; animation-duration: 12s; animation-direction: reverse; }
+  .orbit-3 { width: 520px; height: 200px; animation-duration: 20s; border-color: rgba(0,180,255,0.2); }
+  @keyframes spin {
+    from { transform: rotateX(75deg) rotateZ(0deg); }
+    to   { transform: rotateX(75deg) rotateZ(360deg); }
+  }
+
+  /* Crown SVG */
+  .crown-container {
+    position: relative; z-index: 5;
+    animation: crown-float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 40px rgba(0,180,255,0.6)) drop-shadow(0 0 80px rgba(0,180,255,0.3));
+  }
+  @keyframes crown-float {
+    0%,100% { transform: translateY(0px) rotateY(0deg); }
+    50% { transform: translateY(-18px) rotateY(5deg); }
+  }
+  .crown-svg { width: 180px; height: 180px; }
+
+  /* Glow ring under crown */
+  .glow-ring {
+    position: absolute;
+    width: 240px; height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.8);
+    box-shadow: 0 0 30px rgba(255,255,255,0.5), 0 0 60px rgba(0,180,255,0.4);
+    animation: glow-pulse 3s ease-in-out infinite;
+    bottom: 30px;
+  }
+  @keyframes glow-pulse {
+    0%,100% { opacity: .8; box-shadow: 0 0 30px rgba(255,255,255,.5), 0 0 60px rgba(0,180,255,.4); }
+    50% { opacity: 1; box-shadow: 0 0 50px rgba(255,255,255,.9), 0 0 100px rgba(0,180,255,.7); }
+  }
+
+  /* Hero nav label */
+  .hero-nav-label {
+    position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 24px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; letter-spacing: 3px; color: var(--blue);
+    text-transform: uppercase;
+    animation: fade-in-down 1s ease both;
+  }
+  .hero-nav-label span { opacity: .5; }
+  @keyframes fade-in-down {
+    from { opacity:0; transform: translateX(-50%) translateY(-20px); }
+    to { opacity:1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* Floating debris */
+  .debris {
+    position: absolute;
+    background: rgba(0,180,255,0.7);
+    animation: debris-float linear infinite;
+    border-radius: 2px;
+  }
+  @keyframes debris-float {
+    0% { transform: translate(0,0) rotate(0deg); opacity: .8; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(360deg); opacity: .2; }
+  }
+
+  /* ─── SECTION BASE ──────────────────────────────── */
+  section {
+    position: relative; z-index: 10;
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 100px 80px;
+  }
+  .section-inner { max-width: 1100px; width: 100%; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px; font-weight: 600; letter-spacing: 4px;
+    color: var(--blue); text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 40px; height: 1px; background: var(--blue);
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 900; line-height: .92;
+    text-transform: uppercase; letter-spacing: -1px;
+    margin-bottom: 32px;
+  }
+
+  /* Reveal animation */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
+  }
+  .reveal.visible {
+    opacity: 1; transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: .1s; }
+  .reveal-delay-2 { transition-delay: .2s; }
+  .reveal-delay-3 { transition-delay: .3s; }
+  .reveal-delay-4 { transition-delay: .4s; }
+  .reveal-delay-5 { transition-delay: .5s; }
+
+  /* ─── SECTION 01 – CREED ────────────────────────── */
+  .creed-section {
+    background: linear-gradient(180deg, var(--bg) 0%, #050e1c 100%);
+  }
+  .creed-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+  }
+  .creed-crown-side {
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+  }
+  .creed-crown-3d {
+    width: 300px; height: 340px;
+    position: relative;
+    animation: slow-rotate 20s linear infinite;
+    filter: drop-shadow(0 0 50px rgba(0,180,255,.5));
+  }
+  @keyframes slow-rotate {
+    0% { filter: drop-shadow(0 0 30px rgba(0,180,255,.4)); }
+    50% { filter: drop-shadow(0 0 60px rgba(0,180,255,.8)) drop-shadow(0 0 100px rgba(0,180,255,.3)); }
+    100% { filter: drop-shadow(0 0 30px rgba(0,180,255,.4)); }
+  }
+  .creed-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(0,180,255,0.4);
+    left: 50%; top: 50%;
+  }
+  .creed-ring-1 {
+    width: 360px; height: 120px;
+    margin-left: -180px; margin-top: -60px;
+    transform: rotateX(75deg);
+    animation: creed-ring-spin 6s linear infinite;
+  }
+  .creed-ring-2 {
+    width: 420px; height: 140px;
+    margin-left: -210px; margin-top: -70px;
+    transform: rotateX(75deg);
+    animation: creed-ring-spin 10s linear infinite reverse;
+    border-color: rgba(0,180,255,0.2);
+  }
+  @keyframes creed-ring-spin {
+    from { transform: rotateX(75deg) rotateZ(0deg); }
+    to { transform: rotateX(75deg) rotateZ(360deg); }
+  }
+
+  .creed-text-lines {
+    display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px;
+  }
+  .creed-line {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--blue);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .creed-line::before {
+    content: ''; display: block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue); flex-shrink: 0;
+    box-shadow: 0 0 8px var(--blue);
+  }
+  .creed-body {
+    font-size: 15px; color: var(--grey); line-height: 1.7; max-width: 480px;
+  }
+
+  /* ─── SECTION 02 – THRONE ───────────────────────── */
+  .throne-section {
+    position: relative; overflow: hidden;
+    padding: 0; min-height: 100vh;
+    display: flex; align-items: flex-end;
+  }
+  .throne-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 60% 30%, rgba(30,60,160,.6) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(0,40,100,.4) 0%, transparent 50%),
+      linear-gradient(180deg, #06101e 0%, #0a1428 50%, #060d1a 100%);
+  }
+  /* Fake starfield overlay */
+  .throne-stars {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 60%, rgba(255,255,255,.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 70%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 50%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(2px 2px at 35% 20%, rgba(0,180,255,.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,.4) 0%, transparent 100%);
+  }
+  /* Floating arena visual */
+  .throne-arena {
+    position: absolute;
+    right: -50px; top: 0; bottom: 0;
+    width: 65%;
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(60,80,255,.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 60%, rgba(100,50,255,.2) 0%, transparent 50%);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .throne-crown-giant {
+    position: absolute;
+    top: -80px; right: -30px;
+    animation: throne-crown-pulse 5s ease-in-out infinite;
+    filter: drop-shadow(0 0 60px rgba(100,100,255,.8));
+  }
+  @keyframes throne-crown-pulse {
+    0%,100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 60px rgba(80,80,255,.8)); }
+    50% { transform: translateY(-20px) scale(1.02); filter: drop-shadow(0 0 100px rgba(100,100,255,1)); }
+  }
+  .throne-content {
+    position: relative; z-index: 5;
+    padding: 100px 80px; max-width: 580px;
+  }
+  .throne-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(52px, 7vw, 88px);
+    font-weight: 900; line-height: .9;
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .throne-body { font-size: 16px; color: var(--grey); line-height: 1.6; max-width: 420px; }
+
+  /* ─── SECTION 04 – ROSTER ───────────────────────── */
+  .roster-section { background: var(--bg2); }
+  .roster-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-top: 48px;
+  }
+  .roster-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0,180,255,0.1);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer;
+    position: relative; overflow: hidden;
+    transition: border-color .3s, background .3s, transform .3s;
+  }
+  .roster-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,180,255,.05) 0%, transparent 60%);
+    opacity: 0; transition: opacity .3s;
+  }
+  .roster-card:hover {
+    border-color: rgba(0,180,255,0.5);
+    background: rgba(0,180,255,0.06);
+    transform: translateY(-3px);
+  }
+  .roster-card:hover::before { opacity: 1; }
+
+  /* scan line effect on hover */
+  .roster-card::after {
+    content: '';
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    top: -2px;
+    transition: top .4s ease;
+    opacity: 0;
+  }
+  .roster-card:hover::after { top: 100%; opacity: .6; }
+
+  .roster-num {
+    position: absolute; top: 10px; right: 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; color: rgba(0,180,255,0.3); letter-spacing: 1px;
+  }
+  .roster-avatar {
+    width: 40px; height: 40px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; font-weight: 700; color: white;
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(0,180,255,.3);
+  }
+  .roster-info { flex: 1; min-width: 0; }
+  .roster-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; font-weight: 700; letter-spacing: .5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .roster-role {
+    font-size: 11px; color: var(--grey); letter-spacing: 1px; text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .roster-tag {
+    font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+    padding: 2px 7px; border-radius: 3px;
+    text-transform: uppercase; margin-bottom: 4px; display: inline-block;
+  }
+  .tag-creator {
+    background: rgba(0,180,255,.2); color: var(--blue);
+    border: 1px solid rgba(0,180,255,.4);
+  }
+
+  /* ─── SECTION 05 – HIGHLIGHTS ───────────────────── */
+  .highlights-section { background: var(--bg); }
+  .highlights-placeholder {
+    margin-top: 48px;
+    border: 1px dashed rgba(0,180,255,.2);
+    border-radius: 8px; padding: 60px 40px;
+    position: relative; overflow: hidden;
+  }
+  .highlights-placeholder::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 19px,
+      rgba(0,180,255,.03) 19px, rgba(0,180,255,.03) 20px
+    );
+  }
+  .clip-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--grey); margin-bottom: 16px;
+  }
+  .clip-body { font-size: 14px; color: rgba(136,153,170,.6); line-height: 1.7; }
+  .code-tag {
+    font-family: monospace; font-size: 13px;
+    background: rgba(0,180,255,.1); color: var(--blue);
+    padding: 2px 8px; border-radius: 4px;
+    border: 1px solid rgba(0,180,255,.2);
+  }
+
+  /* ─── FOOTER ────────────────────────────────────── */
+  footer {
+    position: relative; z-index: 10;
+    padding: 60px 80px;
+    border-top: 1px solid rgba(0,180,255,.08);
+    display: flex; align-items: center; justify-content: space-between;
+    background: #020810;
+  }
+  .footer-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px; font-weight: 900; letter-spacing: 4px;
+    color: var(--white);
+  }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; letter-spacing: 2px; color: var(--grey);
+    text-decoration: none; text-transform: uppercase;
+    transition: color .2s;
+  }
+  .footer-links a:hover { color: var(--blue); }
+  .footer-copy { font-size: 11px; color: rgba(136,153,170,.4); letter-spacing: 1px; }
+
+  /* ─── CURSOR GLOW ───────────────────────────────── */
+  .cursor-glow {
+    position: fixed; pointer-events: none; z-index: 9999;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: opacity .3s;
+  }
+
+  /* ─── GLITCH text effect ────────────────────────── */
+  .glitch {
+    position: relative;
+  }
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    clip: rect(0,0,0,0);
+  }
+  .glitch::before {
+    color: var(--blue);
+    animation: glitch1 4s infinite;
+    clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+  }
+  .glitch::after {
+    color: rgba(255,255,255,0.8);
+    animation: glitch2 4s infinite;
+    clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+  }
+  @keyframes glitch1 {
+    0%,92%,100% { transform: translateX(0); opacity: 0; }
+    94% { transform: translateX(-4px); opacity: .6; }
+    96% { transform: translateX(4px); opacity: .4; }
+    98% { transform: translateX(-2px); opacity: .7; }
+  }
+  @keyframes glitch2 {
+    0%,88%,100% { transform: translateX(0); opacity: 0; }
+    90% { transform: translateX(4px); opacity: .5; }
+    92% { transform: translateX(-3px); opacity: .3; }
+    95% { transform: translateX(2px); opacity: .6; }
+  }
+
+  /* ─── SECTION DIVIDER ───────────────────────────── */
+  .divider {
+    position: relative; z-index: 10;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,180,255,0.3) 30%, rgba(0,180,255,0.3) 70%, transparent 100%);
+  }
+
+  /* Media query */
+  @media (max-width: 900px) {
+    .creed-layout { grid-template-columns: 1fr; }
+    .creed-crown-side { display: none; }
+    .roster-grid { grid-template-columns: repeat(2, 1fr); }
+    section { padding: 80px 24px; }
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cursor glow -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- Canvas for particles & fish -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Depth indicator -->
+<div class="depth-bar">
+  <span class="depth-label">Depth</span>
+  <div class="depth-track">
+    <div class="depth-fill" id="depthFill" style="height:0%"></div>
+    <div class="depth-dot" id="depthDot" style="bottom:0%"></div>
+  </div>
+  <div class="depth-value" id="depthValue">0 M</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <svg class="crown-icon" viewBox="0 0 40 32" fill="none">
+      <path d="M4 28L8 12L14 20L20 4L26 20L32 12L36 28H4Z" fill="rgba(0,180,255,0.15)" stroke="#00b4ff" stroke-width="1.5" stroke-linejoin="round"/>
+      <circle cx="20" cy="4" r="2.5" fill="#00b4ff"/>
+      <circle cx="8" cy="12" r="2" fill="#00b4ff"/>
+      <circle cx="32" cy="12" r="2" fill="#00b4ff"/>
+    </svg>
+    K1NG
+  </a>
+  <div class="nav-links">
+    <a href="#creed">Creed</a>
+    <a href="#roster">Roster</a>
+    <a href="#trophies">Trophies</a>
+    <a href="#highlights">Clips</a>
+    <a href="#tryouts">Tryouts</a>
+  </div>
+  <div class="nav-right">
+    <div class="online-badge">
+      <div class="online-dot"></div>
+      <span>online</span>
+    </div>
+    <button class="btn-discord">Join Discord</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-nav-label">
+    <span>K1NG ESPORTS</span>
+    <span>✦</span>
+    <span>FORTNITE</span>
+  </div>
+
+  <div class="hero-scene">
+    <!-- Orbit rings -->
+    <div class="orbit orbit-1"></div>
+    <div class="orbit orbit-2"></div>
+    <div class="orbit orbit-3"></div>
+
+    <!-- Glow ring -->
+    <div class="glow-ring"></div>
+
+    <!-- Crown -->
+    <div class="crown-container">
+      <svg class="crown-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Crown base band -->
+        <rect x="30" y="130" width="140" height="40" rx="4" fill="rgba(200,220,255,0.12)" stroke="rgba(200,220,255,0.4)" stroke-width="1"/>
+        <!-- Studs on base -->
+        <circle cx="50" cy="155" r="4" fill="rgba(0,180,255,0.5)" stroke="rgba(0,180,255,.8)" stroke-width="1"/>
+        <circle cx="70" cy="148" r="3" fill="rgba(200,220,255,.3)" stroke="rgba(200,220,255,.5)" stroke-width="1"/>
+        <circle cx="100" cy="155" r="4" fill="rgba(0,180,255,0.5)" stroke="rgba(0,180,255,.8)" stroke-width="1"/>
+        <circle cx="130" cy="148" r="3" fill="rgba(200,220,255,.3)" stroke="rgba(200,220,255,.5)" stroke-width="1"/>
+        <circle cx="150" cy="155" r="4" fill="rgba(0,180,255,0.5)" stroke="rgba(0,180,255,.8)" stroke-width="1"/>
+
+        <!-- Crown spikes -->
+        <path d="M40 130 L55 70 L70 130Z" fill="rgba(200,220,255,0.15)" stroke="rgba(200,220,255,0.5)" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M70 130 L85 50 L100 130Z" fill="rgba(200,220,255,0.2)" stroke="rgba(200,220,255,0.6)" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M100 130 L115 70 L130 130Z" fill="rgba(200,220,255,0.15)" stroke="rgba(200,220,255,0.5)" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M130 130 L145 85 L160 130Z" fill="rgba(200,220,255,0.12)" stroke="rgba(200,220,255,0.4)" stroke-width="1.2" stroke-linejoin="round"/>
+
+        <!-- Gem tips on spikes -->
+        <path d="M82 52 L88 38 L94 52 L88 58Z" fill="rgba(0,180,255,0.6)" stroke="rgba(0,180,255,.9)" stroke-width="1"/>
+        <path d="M52 72 L57 60 L62 72 L57 77Z" fill="rgba(200,220,255,0.4)" stroke="rgba(200,220,255,.6)" stroke-width="1"/>
+        <path d="M112 72 L117 60 L122 72 L117 77Z" fill="rgba(200,220,255,0.4)" stroke="rgba(200,220,255,.6)" stroke-width="1"/>
+
+        <!-- Inner gem dots on crown body -->
+        <circle cx="55" cy="105" r="6" fill="rgba(0,180,255,0.3)" stroke="rgba(0,180,255,.7)" stroke-width="1.5"/>
+        <circle cx="100" cy="100" r="7" fill="rgba(0,180,255,0.4)" stroke="rgba(0,180,255,.9)" stroke-width="1.5"/>
+        <circle cx="145" cy="105" r="6" fill="rgba(0,180,255,0.3)" stroke="rgba(0,180,255,.7)" stroke-width="1.5"/>
+
+        <!-- Highlight gleam -->
+        <line x1="60" y1="80" x2="60" y2="95" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="85" y1="60" x2="85" y2="78" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="115" y1="75" x2="115" y2="90" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- Arch bands -->
+        <path d="M60 130 Q60 80, 100 70 Q140 80, 140 130" fill="none" stroke="rgba(200,220,255,0.3)" stroke-width="1.5"/>
+        <path d="M50 130 Q50 75, 100 60 Q150 75, 150 130" fill="none" stroke="rgba(200,220,255,0.2)" stroke-width="1"/>
+
+        <!-- Top jewel -->
+        <circle cx="100" cy="60" r="5" fill="rgba(0,180,255,0.7)" stroke="rgba(0,180,255,1)" stroke-width="1.5"/>
+        <circle cx="100" cy="60" r="2" fill="white" opacity=".8"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- SECTION 01 – CREED -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="creed-section" id="creed">
+  <div class="section-inner">
+    <div class="creed-layout">
+      <!-- Crown side -->
+      <div class="creed-crown-side reveal">
+        <div style="position:relative; width:300px; height:340px; display:flex; align-items:center; justify-content:center;">
+          <div class="creed-ring creed-ring-1"></div>
+          <div class="creed-ring creed-ring-2"></div>
+          <div class="creed-crown-3d">
+            <svg viewBox="0 0 200 220" fill="none" style="width:260px;height:300px;">
+              <rect x="20" y="155" width="160" height="50" rx="5" fill="rgba(200,220,255,0.1)" stroke="rgba(200,220,255,0.35)" stroke-width="1.5"/>
+              <circle cx="40" cy="180" r="5" fill="rgba(0,180,255,0.5)" stroke="rgba(0,180,255,.8)" stroke-width="1.5"/>
+              <circle cx="65" cy="170" r="4" fill="rgba(200,220,255,.3)" stroke="rgba(200,220,255,.5)" stroke-width="1"/>
+              <circle cx="100" cy="180" r="5" fill="rgba(0,180,255,0.5)" stroke="rgba(0,180,255,.8)" stroke-width="1.5"/>
+              <circle cx="135" cy="170" r="4" fill="rgba(200,220,255,.3)" stroke="rgba(200,220,255,.5)" stroke-width="1"/>
+              <circle cx="160" cy="180" r="5" fill="rgba(0,180,255,0.5)" stroke="rgba(0,180,255,.8)" stroke-width="1.5"/>
+              <path d="M30 155 L48 80 L67 155Z" fill="rgba(200,220,255,0.12)" stroke="rgba(200,220,255,0.45)" stroke-width="1.5"/>
+              <path d="M67 155 L85 45 L103 155Z" fill="rgba(200,220,255,0.18)" stroke="rgba(200,220,255,0.6)" stroke-width="1.5"/>
+              <path d="M103 155 L121 80 L140 155Z" fill="rgba(200,220,255,0.12)" stroke="rgba(200,220,255,0.45)" stroke-width="1.5"/>
+              <path d="M140 155 L155 100 L170 155Z" fill="rgba(200,220,255,0.1)" stroke="rgba(200,220,255,0.35)" stroke-width="1.5"/>
+              <path d="M82 47 L89 28 L96 47 L89 55Z" fill="rgba(0,180,255,0.7)" stroke="rgba(0,180,255,1)" stroke-width="1"/>
+              <circle cx="50" cy="120" r="7" fill="rgba(0,180,255,0.3)" stroke="rgba(0,180,255,.7)" stroke-width="1.5"/>
+              <circle cx="100" cy="115" r="9" fill="rgba(0,180,255,0.4)" stroke="rgba(0,180,255,.9)" stroke-width="2"/>
+              <circle cx="150" cy="120" r="7" fill="rgba(0,180,255,0.3)" stroke="rgba(0,180,255,.7)" stroke-width="1.5"/>
+              <line x1="88" y1="65" x2="88" y2="88" stroke="rgba(255,255,255,0.9)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="60" y1="92" x2="60" y2="112" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M55 155 Q55 95, 100 80 Q145 95, 145 155" fill="none" stroke="rgba(200,220,255,0.3)" stroke-width="2"/>
+              <circle cx="100" cy="28" r="7" fill="rgba(100,180,255,0.8)" stroke="#00b4ff" stroke-width="2"/>
+              <circle cx="100" cy="28" r="3" fill="white" opacity=".9"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text side -->
+      <div>
+        <div class="section-label reveal">01 — The Creed</div>
+        <h2 class="section-title reveal reveal-delay-1 glitch" data-text="THE CROWN ISN'T GIVEN. IT'S TAKEN.">THE CROWN ISN'T GIVEN. IT'S TAKEN.</h2>
+        <div class="creed-text-lines reveal reveal-delay-2">
+          <div class="creed-line">Every drop is a claim.</div>
+          <div class="creed-line">Every build is a wall between us and second place.</div>
+          <div class="creed-line">Every endgame is a coronation.</div>
+        </div>
+        <p class="creed-body reveal reveal-delay-3">
+          K1NG is a Fortnite esports team built around one idea: play every lobby like the crown is already ours to lose.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- SECTION 02 – THE DROP -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section style="background: linear-gradient(180deg,#040d18 0%,#06101e 100%); padding:100px 80px;" id="drop">
+  <div class="section-inner">
+    <div class="section-label reveal">02 — The Drop</div>
+    <h2 class="section-title reveal reveal-delay-1">EVERY DROP IS<br>YOUR THRONE.</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:48px;">
+      <div class="roster-card reveal reveal-delay-2" style="flex-direction:column;align-items:flex-start;padding:28px;gap:12px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:var(--blue);line-height:1;">100+</div>
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);">Victory Royales</div>
+      </div>
+      <div class="roster-card reveal reveal-delay-3" style="flex-direction:column;align-items:flex-start;padding:28px;gap:12px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:var(--blue);line-height:1;">14</div>
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);">Team Members</div>
+      </div>
+      <div class="roster-card reveal reveal-delay-4" style="flex-direction:column;align-items:flex-start;padding:28px;gap:12px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:var(--blue);line-height:1;">#1</div>
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);">Our Target, Always</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- SECTION 03 – THRONE ROOM -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="throne-section" id="throne">
+  <div class="throne-bg"></div>
+  <div class="throne-stars"></div>
+
+  <!-- Animated crown right side -->
+  <div class="throne-arena">
+    <div class="throne-crown-giant">
+      <svg viewBox="0 0 300 300" fill="none" width="500" height="500" style="opacity:.7;">
+        <!-- Large crown rings -->
+        <ellipse cx="150" cy="160" rx="200" ry="60" fill="none" stroke="rgba(100,100,255,0.4)" stroke-width="2"/>
+        <ellipse cx="150" cy="160" rx="240" ry="80" fill="none" stroke="rgba(80,80,255,0.25)" stroke-width="1.5"/>
+        <!-- Crown body -->
+        <rect x="40" y="210" width="220" height="60" rx="6" fill="rgba(80,100,200,0.2)" stroke="rgba(150,170,255,0.5)" stroke-width="1.5"/>
+        <path d="M50 210 L80 100 L110 210Z" fill="rgba(100,130,255,0.15)" stroke="rgba(150,170,255,0.5)" stroke-width="1.5"/>
+        <path d="M110 210 L140 60 L170 210Z" fill="rgba(100,130,255,0.2)" stroke="rgba(150,170,255,0.6)" stroke-width="2"/>
+        <path d="M170 210 L200 110 L230 210Z" fill="rgba(100,130,255,0.15)" stroke="rgba(150,170,255,0.5)" stroke-width="1.5"/>
+        <!-- gem top -->
+        <path d="M136 62 L148 30 L160 62 L148 75Z" fill="rgba(100,150,255,0.7)" stroke="rgba(150,200,255,1)" stroke-width="2"/>
+        <circle cx="148" cy="30" r="8" fill="rgba(150,200,255,0.8)" stroke="white" stroke-width="2"/>
+        <!-- light beams -->
+        <line x1="148" y1="0" x2="148" y2="30" stroke="rgba(150,200,255,0.6)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="100" y1="15" x2="130" y2="38" stroke="rgba(150,200,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="196" y1="15" x2="166" y2="38" stroke="rgba(150,200,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <!-- Spinning ring around it -->
+    <div style="position:absolute;width:400px;height:130px;border-radius:50%;border:2px solid rgba(100,100,255,0.5);box-shadow:0 0 30px rgba(100,100,255,0.3);animation:creed-ring-spin 8s linear infinite;top:40%;left:50%;transform:translate(-50%,-50%) rotateX(75deg);"></div>
+    <div style="position:absolute;width:480px;height:160px;border-radius:50%;border:1px solid rgba(100,100,255,0.2);animation:creed-ring-spin 14s linear infinite reverse;top:40%;left:50%;transform:translate(-50%,-50%) rotateX(75deg);"></div>
+  </div>
+
+  <div class="throne-content">
+    <div class="section-label reveal" style="color:#8888ff;">03 — The Throne Room</div>
+    <h2 class="throne-title reveal reveal-delay-1">EVERY LOBBY IS<br>A THRONE ROOM.</h2>
+    <p class="throne-body reveal reveal-delay-2">Storm closes. Circle shrinks. The crown floats over the last one standing.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- SECTION 04 – ROSTER -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="roster-section" id="roster">
+  <div class="section-inner">
+    <div class="section-label reveal">04 — The Court</div>
+    <h2 class="section-title reveal reveal-delay-1">14 NAMES.<br>ONE CROWN.</h2>
+    <p style="color:var(--grey);font-size:15px;line-height:1.6;margin-top:8px;" class="reveal reveal-delay-2">
+      Every K1NG player carries the tag.<br>This is who's wearing it right now.
+    </p>
+
+    <div class="roster-grid" id="rosterGrid"></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- SECTION 05 – HIGHLIGHTS -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="highlights-section" id="highlights">
+  <div class="section-inner">
+    <div class="section-label reveal">06 — Highlights</div>
+    <h2 class="section-title reveal reveal-delay-1">MOMENTS WORTH<br>WATCHING TWICE.</h2>
+    <div class="highlights-placeholder reveal reveal-delay-2">
+      <div class="clip-label">First Clip Drops Soon.</div>
+      <p class="clip-body">
+        Anyone on the team can post a highlight in Discord with <span class="code-tag">/clip</span> or <span class="code-tag">/postvideo</span> and it lands here.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- SECTION 06 – TRYOUTS -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section style="background:var(--bg2);min-height:60vh;" id="tryouts">
+  <div class="section-inner" style="text-align:center;display:flex;flex-direction:column;align-items:center;">
+    <div class="section-label reveal" style="justify-content:center;">Tryouts Open</div>
+    <h2 class="section-title reveal reveal-delay-1" style="font-size:clamp(48px,7vw,88px);">THINK YOU'RE<br>BUILT FOR THIS?</h2>
+    <p style="color:var(--grey);font-size:16px;max-width:480px;line-height:1.7;margin-bottom:40px;" class="reveal reveal-delay-2">
+      We don't look for players. We look for winners. If you play every game like the crown is already yours — prove it.
+    </p>
+    <button class="reveal reveal-delay-3" onclick="alert('Tryouts form coming soon!')" style="
+      font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+      letter-spacing:3px;text-transform:uppercase;
+      background:transparent;color:var(--blue);
+      border:1px solid var(--blue);
+      padding:16px 48px;cursor:pointer;
+      clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);
+      transition:background .3s,color .3s,box-shadow .3s;
+    "
+    onmouseenter="this.style.background='var(--blue)';this.style.color='#040d18';this.style.boxShadow='0 0 40px rgba(0,180,255,.5)'"
+    onmouseleave="this.style.background='transparent';this.style.color='var(--blue)';this.style.boxShadow='none'"
+    >
+      Apply Now
+    </button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">K1NG</div>
+  <div class="footer-links">
+    <a href="#">Creed</a>
+    <a href="#">Roster</a>
+    <a href="#">Trophies</a>
+    <a href="#">Clips</a>
+    <a href="#">Tryouts</a>
+  </div>
+  <div class="footer-copy">© 2026 K1NG ESPORTS — All Rights Reserved</div>
+</footer>
+
+<!-- ════════════════════════════════════════════════ -->
+<script>
+/* ─── ROSTER DATA ─────────────────────────────── */
+const roster = [
+  { initials:'TE', name:'TermlessBug456', role:'Founder', tag:'CREATOR', num:'01' },
+  { initials:'BL', name:'K1NG Blaze', role:'Player', tag:null, num:'02' },
+  { initials:'CR', name:'K1NG Cronus', role:'Player', tag:null, num:'03' },
+  { initials:'FI', name:'K1NG Fin', role:'Player', tag:null, num:'04' },
+  { initials:'KS', name:'K1NG Ksnrehy', role:'Player', tag:null, num:'05' },
+  { initials:'LE', name:'K1NG Lex!', role:'Player', tag:null, num:'06' },
+  { initials:'RI', name:'K1NG Ritualfnx', role:'Player', tag:null, num:'07' },
+  { initials:'SO', name:'K1NG Sophie', role:'Player', tag:null, num:'08' },
+  { initials:'SP', name:'K1NG SPARX7', role:'Player', tag:null, num:'09' },
+  { initials:'T', name:'K1NG T', role:'Player', tag:null, num:'10' },
+  { initials:'TA', name:'K1ng Tazz', role:'Player', tag:null, num:'11' },
+  { initials:'TR', name:'K1ng Trist', role:'Player', tag:null, num:'12' },
+  { initials:'VA', name:'K1NG Varr', role:'Player', tag:null, num:'13' },
+  { initials:'AP', name:'K1ng apollo fv!', role:'Player', tag:null, num:'14' },
+];
+
+const grid = document.getElementById('rosterGrid');
+roster.forEach((p, i) => {
+  const card = document.createElement('div');
+  card.className = `roster-card reveal reveal-delay-${Math.min((i%5)+1,5)}`;
+  card.innerHTML = `
+    <span class="roster-num">${p.num}</span>
+    <div class="roster-avatar">${p.initials}</div>
+    <div class="roster-info">
+      ${p.tag ? `<span class="roster-tag tag-creator">${p.tag}</span>` : ''}
+      <div class="roster-name">${p.name}</div>
+      <div class="roster-role">${p.role}</div>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+
+/* ─── REVEAL ON SCROLL ──────────────────────── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* ─── DEPTH INDICATOR ───────────────────────── */
+const depthFill = document.getElementById('depthFill');
+const depthDot  = document.getElementById('depthDot');
+const depthVal  = document.getElementById('depthValue');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  const h = Math.round(pct * 100);
+  depthFill.style.height = h + '%';
+  depthDot.style.bottom  = h + '%';
+  depthVal.textContent   = Math.round(pct * 900) + ' M';
+});
+
+/* ─── CURSOR GLOW ───────────────────────────── */
+const glow = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', e => {
+  glow.style.left = e.clientX + 'px';
+  glow.style.top  = e.clientY + 'px';
+});
+
+/* ─── CANVAS PARTICLES & FISH ───────────────── */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* Particles */
+const particles = [];
+for (let i = 0; i < 120; i++) {
+  particles.push({
+    x: Math.random() * 1920,
+    y: Math.random() * 1080,
+    r: Math.random() * 2 + .3,
+    vx: (Math.random() - .5) * .3,
+    vy: (Math.random() - .5) * .3,
+    alpha: Math.random() * .6 + .1,
+    type: Math.random() < .12 ? 'ring'
+        : Math.random() < .25 ? 'triangle'
+        : 'dot',
+    size: Math.random() * 8 + 4,
+    rot: Math.random() * Math.PI * 2,
+    rotV: (Math.random() - .5) * .02,
+  });
+}
+
+/* Fish */
+function makeFish() {
+  return {
+    x: Math.random() < .5 ? -80 : W + 80,
+    y: Math.random() * H * .7 + 50,
+    speed: (Math.random() * 1.5 + .8) * (Math.random() < .5 ? 1 : -1),
+    scale: Math.random() * .6 + .5,
+    alpha: Math.random() * .5 + .3,
+    wobble: 0,
+    wobbleSpeed: Math.random() * .08 + .04,
+  };
+}
+const fish = [];
+for (let i = 0; i < 18; i++) {
+  const f = makeFish();
+  f.x = Math.random() * W; // spread initial fish
+  fish.push(f);
+}
+
+function drawFish(f) {
+  ctx.save();
+  ctx.translate(f.x, f.y + Math.sin(f.wobble) * 6);
+  if (f.speed < 0) ctx.scale(-1, 1);
+  ctx.scale(f.scale, f.scale);
+  ctx.globalAlpha = f.alpha;
+  ctx.strokeStyle = '#00b4ff';
+  ctx.lineWidth = 1.2;
+  ctx.fillStyle = 'rgba(0,120,180,0.15)';
+
+  // body
+  ctx.beginPath();
+  ctx.moveTo(30, 0);
+  ctx.quadraticCurveTo(0, -10, -20, 0);
+  ctx.quadraticCurveTo(0, 10, 30, 0);
+  ctx.fill(); ctx.stroke();
+
+  // tail
+  ctx.beginPath();
+  ctx.moveTo(-20, 0);
+  ctx.lineTo(-34, -10);
+  ctx.lineTo(-34, 10);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // eye
+  ctx.beginPath();
+  ctx.arc(18, -3, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,180,255,0.8)';
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Particles
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
+    if (p.x < -50) p.x = W + 50;
+    if (p.x > W + 50) p.x = -50;
+    if (p.y < -50) p.y = H + 50;
+    if (p.y > H + 50) p.y = -50;
+
+    ctx.save();
+    ctx.translate(p.x % W, p.y % H);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = p.alpha;
+
+    if (p.type === 'dot') {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = Math.random() < .8 ? '#00b4ff' : '#ffffff';
+      ctx.fill();
+    } else if (p.type === 'ring') {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0,180,255,0.5)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    } else { // triangle
+      const s = p.size * .8;
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.lineTo(s * .866, s * .5);
+      ctx.lineTo(-s * .866, s * .5);
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(0,180,255,0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+
+  // Fish
+  fish.forEach(f => {
+    f.x += f.speed;
+    f.wobble += f.wobbleSpeed;
+    if (f.speed > 0 && f.x > W + 100) { Object.assign(f, makeFish()); f.speed = Math.abs(f.speed); f.x = -80; }
+    if (f.speed < 0 && f.x < -100) { Object.assign(f, makeFish()); f.speed = -Math.abs(f.speed); f.x = W + 80; }
+    drawFish(f);
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ─── HUE SHIFT on scroll (subtle) ─────────── */
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  const hue = Math.round(pct * 60); // 0 = cyan, 60 = blue-violet
+  document.documentElement.style.setProperty('--blue', `hsl(${200 + hue}, 100%, 55%)`);
+});
+</script>
+</body>
+</html>
