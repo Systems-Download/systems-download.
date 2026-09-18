@@ -2327,6 +2327,7 @@ async function fetchReleases(){
   }catch(e){
     const msg=e.message==='404'?t('e404'):e.message==='403'?t('e403'):t('egn')+e.message;
     ['conch-list','cmdr-list'].forEach(id=>document.getElementById(id).innerHTML=`<div class="error-state">❌ ${msg}</div>`);
+    if(window.CCErrors)CCErrors.report('file list');
   }
 }
 function rerender(){if(_cc.length||_cr.length){render('conch',_cc,'c');render('cmdr',_cr,'r');renderBeta('conch-beta',_ccb,'c');renderBeta('cmdr-beta',_crb,'r');}}
