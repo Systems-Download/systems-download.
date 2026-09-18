@@ -54,7 +54,7 @@ window.CC_CONFIG = {
      get into the admin panel while the site is down for others).
      Admins (see ADMIN_USERNAME) always bypass the lock. */
   MAINTENANCE: {
-    ENABLED: false,
+    ENABLED: true,
     TITLE: 'Under Maintenance',
     MESSAGE: 'We\'re making some improvements right now. Check back shortly — or join our Discord for updates.',
     ALLOW: ['cc-control.html'],
@@ -64,7 +64,7 @@ window.CC_CONFIG = {
      Quick site-wide notice without touching the database.
      TYPE: 'info' | 'success' | 'warning' | 'danger' */
   SITE_BANNER: {
-    ENABLED: true,
+    ENABLED: false,
     TEXT: 'Site Maintenance in 7h! It will last till 1PM, GMT+2',
     TYPE: 'warning',
   },
