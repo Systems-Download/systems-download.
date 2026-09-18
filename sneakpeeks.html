@@ -319,7 +319,8 @@ async function loadPeeks(){
     _peeks=rows;
     renderPeeks(rows);
   }catch(e){
-    document.getElementById('peeks-grid').innerHTML='<div class="empty-state">Failed to load sneak peeks.</div>';
+    document.getElementById('peeks-grid').innerHTML='<div class="empty-state">Unavailable right now.</div>';
+    if(window.CCErrors)CCErrors.report('Sneak Peeks');
   }
 }
 
