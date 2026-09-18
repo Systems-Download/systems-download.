@@ -64,9 +64,9 @@ window.CC_CONFIG = {
      Quick site-wide notice without touching the database.
      TYPE: 'info' | 'success' | 'warning' | 'danger' */
   SITE_BANNER: {
-    ENABLED: false,
-    TEXT: '',
-    TYPE: 'info',
+    ENABLED: true,
+    TEXT: 'Site Maintenance in 8h! It will last till 1PM, GMT+2',
+    TYPE: 'warning',
   },
 
   /* ── FEATURE FLAGS ──
