@@ -48,9 +48,142 @@ window.CC_CONFIG = {
   /* ── THIRD-PARTY ── */
   VPNAPI_KEY: '8f961fd03d784466b46546b5aba9ebdb',
 
+  /* ── MAINTENANCE MODE ──
+     Set ENABLED to true to lock the whole site behind a maintenance
+     screen. Pages listed in ALLOW stay reachable (so you can still
+     get into the admin panel while the site is down for others).
+     Admins (see ADMIN_USERNAME) always bypass the lock. */
+  MAINTENANCE: {
+    ENABLED: false,
+    TITLE: 'Under Maintenance',
+    MESSAGE: 'We\'re making some improvements right now. Check back shortly — or join our Discord for updates.',
+    ALLOW: ['cc-control.html'],
+  },
+
+  /* ── SITE BANNER ──
+     Quick site-wide notice without touching the database.
+     TYPE: 'info' | 'success' | 'warning' | 'danger' */
+  SITE_BANNER: {
+    ENABLED: false,
+    TEXT: '',
+    TYPE: 'info',
+  },
+
   /* ── FEATURE FLAGS ──
      Flip these to turn features on/off site-wide. */
   ENABLE_LIVE_RELEASE_BANNER: true,
   ENABLE_DOWNLOAD_LOGGING: true,
   ENABLE_SNEAK_PEEKS: true,
 };
+
+/* ═══════════════════════════════════════════════════════════
+   MAINTENANCE MODE + SITE BANNER ENFORCEMENT
+   Runs automatically on every page that loads config.js.
+═══════════════════════════════════════════════════════════ */
+(function () {
+  const cfg = window.CC_CONFIG;
+
+  /* ── Is the current visitor an admin? ── */
+  function isAdmin() {
+    try {
+      const saved = localStorage.getItem('cc_auth');
+      if (!saved) return false;
+      const u = JSON.parse(saved);
+      if (!u) return false;
+      const name = (u.rawUsername || u.username || '').toLowerCase();
+      return name === (cfg.ADMIN_USERNAME || '').toLowerCase() || u.isAdmin === true;
+    } catch {
+      return false;
+    }
+  }
+
+  /* ── Maintenance lock ── */
+  function applyMaintenance() {
+    if (!cfg.MAINTENANCE || !cfg.MAINTENANCE.ENABLED) return;
+
+    const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    const allowed = (cfg.MAINTENANCE.ALLOW || []).map(p => p.toLowerCase());
+    if (allowed.includes(page)) return;
+    if (isAdmin()) {
+      showAdminBypassNotice();
+      return;
+    }
+
+    const html = `
+      <div id="cc-maintenance" style="
+        position:fixed;inset:0;z-index:100000;
+        background:#0b0c0f;color:#e8eaf0;
+        display:flex;align-items:center;justify-content:center;
+        flex-direction:column;text-align:center;padding:2rem;
+        font-family:'Space Grotesk',sans-serif;">
+        <div style="font-size:3.5rem;margin-bottom:1rem">🔧</div>
+        <div style="font-size:2rem;font-weight:700;margin-bottom:.8rem;letter-spacing:-.02em">
+          ${cfg.MAINTENANCE.TITLE || 'Under Maintenance'}
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#6b7280;
+                    line-height:1.8;max-width:420px;margin-bottom:1.8rem">
+          ${cfg.MAINTENANCE.MESSAGE || ''}
+        </div>
+        <a href="${cfg.DISCORD_INVITE_URL}" target="_blank" rel="noopener" style="
+          font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+          padding:.75rem 1.6rem;border-radius:9px;text-decoration:none;
+          background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.35);color:#8b9cf4;">
+          💬 Join the Discord
+        </a>
+      </div>`;
+
+    function inject() {
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.body.style.overflow = 'hidden';
+    }
+    if (document.body) inject();
+    else document.addEventListener('DOMContentLoaded', inject, { once: true });
+  }
+
+  /* ── Small notice so admins know the site is locked for everyone else ── */
+  function showAdminBypassNotice() {
+    function inject() {
+      const el = document.createElement('div');
+      el.style.cssText = `
+        position:fixed;bottom:1rem;left:1rem;z-index:99999;
+        background:rgba(255,200,50,.12);border:1px solid rgba(255,200,50,.3);
+        color:#ffc832;font-family:'JetBrains Mono',monospace;font-size:.72rem;
+        padding:.6rem .9rem;border-radius:8px;`;
+      el.textContent = '🔧 Maintenance mode is ON — visitors see a maintenance screen.';
+      document.body.appendChild(el);
+    }
+    if (document.body) inject();
+    else document.addEventListener('DOMContentLoaded', inject, { once: true });
+  }
+
+  /* ── Config-driven site banner ── */
+  function applySiteBanner() {
+    const b = cfg.SITE_BANNER;
+    if (!b || !b.ENABLED || !b.TEXT) return;
+
+    const colors = {
+      info:    ['rgba(100,160,255,.12)', 'rgba(100,160,255,.25)', '#64a0ff'],
+      success: ['rgba(60,200,120,.12)',  'rgba(60,200,120,.25)',  '#3cc878'],
+      warning: ['rgba(255,200,50,.12)',  'rgba(255,200,50,.25)',  '#ffc832'],
+      danger:  ['rgba(255,79,94,.12)',   'rgba(255,79,94,.25)',   '#ff4f5e'],
+    };
+    const [bg, border, fg] = colors[b.TYPE] || colors.info;
+
+    function inject() {
+      const el = document.createElement('div');
+      el.id = 'cc-config-banner';
+      el.style.cssText = `
+        position:fixed;top:0;left:0;right:0;z-index:10040;
+        background:${bg};border-bottom:1px solid ${border};color:${fg};
+        font-family:'JetBrains Mono',monospace;font-size:.78rem;
+        padding:.65rem 1.2rem;text-align:center;`;
+      el.textContent = b.TEXT;
+      document.body.appendChild(el);
+    }
+    if (document.body) inject();
+    else document.addEventListener('DOMContentLoaded', inject, { once: true });
+  }
+
+  applyMaintenance();
+  applySiteBanner();
+})();
