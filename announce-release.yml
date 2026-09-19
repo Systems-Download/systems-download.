@@ -1,0 +1,87 @@
+name: Announce new release on Discord
+
+# Fires whenever a GitHub Release is published (not just created as a draft).
+on:
+  release:
+    types: [published]
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord announcement
+        env:
+          RELEASE_WEBHOOK: ${{ secrets.RELEASE_WEBHOOK }}
+          RELEASE_PING_ROLE_ID: ${{ secrets.RELEASE_PING_ROLE_ID }}
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          NAME="${{ github.event.release.name }}"
+          BODY=$(cat << 'RELEASEBODY'
+          ${{ github.event.release.body }}
+          RELEASEBODY
+          )
+          URL="${{ github.event.release.html_url }}"
+          ASSETS_COUNT="${{ github.event.release.assets_count }}"
+
+          # Determine tool type from tag/name for color coding
+          LOWER_NAME=$(echo "$NAME $TAG" | tr '[:upper:]' '[:lower:]')
+          if echo "$LOWER_NAME" | grep -q "sentinel"; then
+            COLOR=16726438   # #ff3da6 sentinel pink
+            TOOL_LABEL="Sentinel"
+            TOOL_ICON="◈"
+          elif echo "$LOWER_NAME" | grep -q "conch"; then
+            COLOR=1046726    # #0ff4c6 conch teal
+            TOOL_LABEL="Conch"
+            TOOL_ICON="🧩"
+          elif echo "$LOWER_NAME" | grep -q "cmdr"; then
+            COLOR=16727902   # #ff4f5e cmdr red
+            TOOL_LABEL="Cmdr"
+            TOOL_ICON="⚔️"
+          else
+            COLOR=10066329   # neutral grey
+            TOOL_LABEL="Release"
+            TOOL_ICON="🚀"
+          fi
+
+          # Trim body to max 1800 chars (Discord embed field limit is 1024, description 4096)
+          BODY_TRIM=$(echo "$BODY" | head -c 1800)
+          if [ ${#BODY} -gt 1800 ]; then
+            BODY_TRIM="${BODY_TRIM}..."
+          fi
+
+          # Build payload
+          PAYLOAD=$(jq -n \
+            --arg ping "<@&${RELEASE_PING_ROLE_ID}>" \
+            --arg tag "$TAG" \
+            --arg name "$NAME" \
+            --arg icon "$TOOL_ICON" \
+            --arg label "$TOOL_LABEL" \
+            --arg url "$URL" \
+            --arg body "$BODY_TRIM" \
+            --argjson color "$COLOR" \
+            '{
+              content: $ping,
+              embeds: [{
+                title: ($icon + " " + $name),
+                url: $url,
+                description: $body,
+                color: $color,
+                fields: [
+                  { name: "Tag", value: ("`" + $tag + "`"), inline: true },
+                  { name: "Tool", value: $label, inline: true }
+                ],
+                footer: { text: "Systems-Download · New release published" },
+                timestamp: (now | todate)
+              }]
+            }')
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$RELEASE_WEBHOOK")
+
+          echo "Discord responded with HTTP $HTTP_STATUS"
+          if [ "$HTTP_STATUS" != "204" ] && [ "$HTTP_STATUS" != "200" ]; then
+            echo "Warning: Discord webhook returned non-success status $HTTP_STATUS"
+            exit 1
+          fi
