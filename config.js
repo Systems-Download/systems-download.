@@ -36,6 +36,13 @@ window.CC_CONFIG = {
   get DISCORD_INVITE_URL() { return 'https://discord.gg/' + this.DISCORD_INVITE_CODE; },
   DISCORD_WEBHOOK: 'https://discord.com/api/webhooks/1510446146458353747/pnX8TWoZRQsPb9zK5UY5XK1jET80JB9r-DvafMdDVAauLRKCCvGPUha_SvkmtLcoG31p',
 
+  /* ── RELEASE ANNOUNCEMENT WEBHOOK ──
+     Separate webhook for automatic release announcements.
+     Replace the URL below with your new webhook after revoking the old one.
+     Set RELEASE_PING_ROLE_ID to your role ID to ping it on each release. */
+  RELEASE_WEBHOOK: 'PASTE_NEW_WEBHOOK_URL_HERE',
+  RELEASE_PING_ROLE_ID: '1480242594448539812',
+
   /* ── RELEASE COUNTDOWNS ──
      Set to null to hide a countdown entirely. */
   NEXT_RELEASE_CONCH: '2026-06-01T15:45:00Z',
@@ -66,7 +73,7 @@ window.CC_CONFIG = {
   SITE_BANNER: {
     ENABLED: false,
     TEXT: '',
-    TYPE: '',
+    TYPE: 'info',
   },
 
   /* ── FEATURE FLAGS ──
