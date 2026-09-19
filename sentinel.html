@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel — Conch & Cmdr</title>
+<meta name="description" content="Sentinel is a fully original Roblox admin panel by Systems-Download — custom UI, autocomplete, client + server validation, whitelist, server switching and more.">
+<link rel="canonical" href="https://systems-download.github.io/sentinel.html">
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --conch:#0ff4c6;--cmdr:#ff4f5e;--sentinel:#ff3da6;
+  --bg:#0b0c0f;--surface:#13151a;--surface2:#1a1d24;
+  --border:rgba(255,255,255,0.07);--text:#e8eaf0;--muted:#6b7280;
+  --mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;background:rgba(11,12,15,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:64px}
+.nav-logo{font-size:1.1rem;font-weight:700;display:flex;gap:.4em;align-items:center;text-decoration:none}
+.nav-logo .c{color:var(--conch)}.nav-logo .sep{color:var(--muted)}.nav-logo .r{color:var(--cmdr)}
+.nav-right{display:flex;align-items:center;gap:.6rem}
+.nav-back{font-family:var(--mono);font-size:.75rem;padding:.4rem .9rem;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);text-decoration:none;transition:all .2s}
+.nav-back:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.nav-dl{font-family:var(--mono);font-size:.75rem;padding:.4rem .9rem;border-radius:6px;border:1px solid rgba(255,61,166,.3);background:rgba(255,61,166,.1);color:var(--sentinel);text-decoration:none;transition:all .2s}
+.nav-dl:hover{background:rgba(255,61,166,.2)}
+
+/* HERO */
+.hero{padding:9rem 2.5rem 5rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-20%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(255,61,166,.12) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;padding:.35rem .9rem;border-radius:20px;background:rgba(255,61,166,.1);color:var(--sentinel);border:1px solid rgba(255,61,166,.25);margin-bottom:1.2rem}
+.hero h1{font-size:clamp(3rem,8vw,5rem);font-weight:700;letter-spacing:-.03em;margin-bottom:.75rem}
+.hero h1 span{color:var(--sentinel)}
+.hero-sub{font-family:var(--mono);font-size:.9rem;color:var(--muted);max-width:500px;margin:0 auto 2rem;line-height:1.8}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-primary{padding:.8rem 1.8rem;border-radius:9px;background:var(--sentinel);color:#fff;text-decoration:none;font-weight:700;font-family:var(--mono);font-size:.85rem;transition:all .2s;border:none;cursor:pointer}
+.btn-primary:hover{background:#e0358f;transform:translateY(-1px)}
+.btn-secondary{padding:.8rem 1.8rem;border-radius:9px;background:rgba(255,61,166,.1);color:var(--sentinel);text-decoration:none;font-weight:700;font-family:var(--mono);font-size:.85rem;border:1px solid rgba(255,61,166,.3);transition:all .2s}
+.btn-secondary:hover{background:rgba(255,61,166,.2)}
+
+/* FEATURES */
+.section{max-width:1000px;margin:0 auto;padding:0 2.5rem 6rem}
+.section-head{text-align:center;margin-bottom:3rem}
+.section-head h2{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.02em;margin-bottom:.6rem}
+.section-head p{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;transition:border-color .2s}
+.feature-card:hover{border-color:rgba(255,61,166,.3)}
+.feature-icon{font-size:1.6rem;margin-bottom:.75rem}
+.feature-title{font-weight:700;font-size:1rem;margin-bottom:.4rem}
+.feature-desc{font-family:var(--mono);font-size:.78rem;color:var(--muted);line-height:1.7}
+
+/* COMMAND REFERENCE */
+.cmd-section{max-width:900px;margin:0 auto;padding:0 2.5rem 6rem}
+.cmd-search-wrap{position:relative;margin-bottom:1.5rem}
+.cmd-search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none}
+.cmd-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:.82rem;padding:.75rem 1rem .75rem 2.4rem;outline:none;transition:border-color .2s}
+.cmd-search:focus{border-color:rgba(255,61,166,.4)}
+.cmd-search::placeholder{color:var(--muted);opacity:.5}
+
+.cmd-filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.cmd-filter{font-family:var(--mono);font-size:.7rem;padding:.35rem .75rem;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .2s}
+.cmd-filter:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.cmd-filter.active{background:rgba(255,61,166,.12);border-color:rgba(255,61,166,.35);color:var(--sentinel)}
+
+.cmd-list{display:flex;flex-direction:column;gap:.5rem}
+.cmd-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.cmd-card:hover{border-color:rgba(255,61,166,.25)}
+.cmd-card.hidden{display:none}
+.cmd-header{display:flex;align-items:center;gap:1rem;padding:1rem 1.3rem;cursor:pointer;user-select:none}
+.cmd-name{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--sentinel)}
+.cmd-syntax{font-family:var(--mono);font-size:.76rem;color:var(--muted);flex:1}
+.cmd-cat-badge{font-family:var(--mono);font-size:.6rem;padding:.15rem .5rem;border-radius:4px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);white-space:nowrap}
+.cmd-arrow{color:var(--muted);font-size:.75rem;transition:transform .25s;flex-shrink:0}
+.cmd-card.open .cmd-arrow{transform:rotate(180deg);color:var(--sentinel)}
+.cmd-body{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1)}
+.cmd-card.open .cmd-body{max-height:400px}
+.cmd-body-inner{padding:.1rem 1.3rem 1.2rem}
+.cmd-desc{font-family:var(--mono);font-size:.8rem;color:var(--muted);line-height:1.8;margin-bottom:.75rem}
+.cmd-example-label{font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);opacity:.6;margin-bottom:.3rem}
+.cmd-example{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.6rem .9rem;font-family:var(--mono);font-size:.82rem;color:var(--text)}
+.cmd-perms{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.65rem}
+.cmd-perm{font-family:var(--mono);font-size:.62rem;padding:.15rem .45rem;border-radius:4px;background:rgba(255,61,166,.08);color:var(--sentinel);border:1px solid rgba(255,61,166,.2)}
+
+.no-results{font-family:var(--mono);font-size:.8rem;color:var(--muted);text-align:center;padding:3rem;opacity:.5;display:none}
+.no-results.vis{display:block}
+
+/* CTA BAND */
+.cta-band{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 2.5rem;text-align:center;margin-bottom:4rem}
+.cta-band h2{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:.75rem}
+.cta-band p{font-family:var(--mono);font-size:.85rem;color:var(--muted);margin-bottom:2rem}
+
+/* REDUCED MOTION */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+
+@media(max-width:768px){
+  nav{padding:1rem 1.2rem}
+  .hero{padding:7rem 1.5rem 4rem}
+  .features-grid{grid-template-columns:1fr}
+  .section,.cmd-section{padding-left:1.2rem;padding-right:1.2rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html"><span class="c">Conch</span><span class="sep">/</span><span class="r">Cmdr</span></a>
+  <div class="nav-right">
+    <a class="nav-back" href="index.html">← Home</a>
+    <a class="nav-dl" href="download.html">↓ Download Sentinel</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">◈ Fully Original</div>
+  <h1><span>Sentinel</span></h1>
+  <p class="hero-sub">A fully original Roblox admin panel by Systems-Download. Classic command-line style interface with a custom UI, built entirely from scratch.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="download.html">↓ Download Sentinel</a>
+    <a class="btn-secondary" href="#commands">View Commands →</a>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="section-head">
+    <h2>What Sentinel offers</h2>
+    <p>Everything built in — no extra setup</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🖥️</div>
+      <div class="feature-title">Custom UI</div>
+      <div class="feature-desc">A fully custom admin panel interface — not a default Roblox GUI. Designed specifically for Sentinel's command-line style.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⌨️</div>
+      <div class="feature-title">Classic Command-Line Style</div>
+      <div class="feature-desc">Commands feel like a classic terminal interface — fast, familiar, and efficient for admins who know what they're doing.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✅</div>
+      <div class="feature-title">Autocomplete</div>
+      <div class="feature-desc">Commands and player names autocomplete as you type, so you spend less time typing and more time moderating.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-title">Client + Server Validation</div>
+      <div class="feature-desc">Every command is validated on both client and server — no exploiter can spoof or bypass admin actions.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Whitelist System</div>
+      <div class="feature-desc">Built-in whitelist system to control exactly who has access to the admin panel and at what permission level.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌐</div>
+      <div class="feature-title">Server Switching</div>
+      <div class="feature-desc">Switch between servers directly from the panel — built-in system, no external scripts needed.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Fully Original Code</div>
+      <div class="feature-desc">Unlike Conch and Cmdr which build on open-source engines, Sentinel is written entirely by Systems-Download from scratch.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">More Coming Soon</div>
+      <div class="feature-desc">Sentinel is actively developed. New systems, commands, and features are added regularly — check Sneak Peeks for previews.</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMAND REFERENCE -->
+<div class="cmd-section" id="commands">
+  <div class="section-head">
+    <h2>Command Reference</h2>
+    <p>Every available Sentinel command — searchable and filterable</p>
+  </div>
+
+  <div class="cmd-search-wrap">
+    <span class="cmd-search-icon">🔍</span>
+    <input class="cmd-search" id="cmd-search" type="text" placeholder="Search commands..." oninput="filterCmds()">
+  </div>
+
+  <div class="cmd-filters" id="cmd-filters"></div>
+
+  <div class="cmd-list" id="cmd-list"></div>
+  <div class="no-results" id="no-results">No commands match your search.</div>
+</div>
+
+<!-- CTA -->
+<div class="cta-band">
+  <h2>Ready to try Sentinel?</h2>
+  <p>Free to download — no account required to browse, login to download.</p>
+  <a class="btn-primary" href="download.html">↓ Download Now</a>
+</div>
+
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);opacity:.5">
+  Sentinel — by Systems-Download · <a href="index.html" style="color:var(--sentinel);text-decoration:none">Back to Home</a>
+</footer>
+
+<script>
+/* ── COMMAND DATA ──
+   Add your real Sentinel commands here.
+   Format: { name, syntax, desc, example, cat, perms[] }
+   cat: 'moderation' | 'utility' | 'server' | 'whitelist' | 'fun'
+*/
+const COMMANDS = [
+  {
+    name: ':kick',
+    syntax: ':kick <player> [reason]',
+    desc: 'Kicks a player from the server with an optional reason message.',
+    example: ':kick PlayerName Exploiting',
+    cat: 'moderation',
+    perms: ['Moderator', 'Admin', 'Owner'],
+  },
+  {
+    name: ':ban',
+    syntax: ':ban <player> [reason]',
+    desc: 'Bans a player from the game. The ban is logged and persists across sessions.',
+    example: ':ban PlayerName Cheating',
+    cat: 'moderation',
+    perms: ['Admin', 'Owner'],
+  },
+  {
+    name: ':unban',
+    syntax: ':unban <player>',
+    desc: 'Removes an existing ban, allowing the player to rejoin the game.',
+    example: ':unban PlayerName',
+    cat: 'moderation',
+    perms: ['Admin', 'Owner'],
+  },
+  {
+    name: ':mute',
+    syntax: ':mute <player> [reason]',
+    desc: 'Mutes a player so they cannot send chat messages.',
+    example: ':mute PlayerName Spamming',
+    cat: 'moderation',
+    perms: ['Moderator', 'Admin', 'Owner'],
+  },
+  {
+    name: ':unmute',
+    syntax: ':unmute <player>',
+    desc: 'Removes a mute, allowing the player to chat again.',
+    example: ':unmute PlayerName',
+    cat: 'moderation',
+    perms: ['Moderator', 'Admin', 'Owner'],
+  },
+  {
+    name: ':tp',
+    syntax: ':tp <player> <target>',
+    desc: 'Teleports one player to another player\'s position.',
+    example: ':tp PlayerA PlayerB',
+    cat: 'utility',
+    perms: ['Admin', 'Owner'],
+  },
+  {
+    name: ':bring',
+    syntax: ':bring <player>',
+    desc: 'Teleports a player directly to your position.',
+    example: ':bring PlayerName',
+    cat: 'utility',
+    perms: ['Admin', 'Owner'],
+  },
+  {
+    name: ':goto',
+    syntax: ':goto <player>',
+    desc: 'Teleports yourself to the target player\'s position.',
+    example: ':goto PlayerName',
+    cat: 'utility',
+    perms: ['Moderator', 'Admin', 'Owner'],
+  },
+  {
+    name: ':server',
+    syntax: ':server <server-id>',
+    desc: 'Switches to a different server using the built-in server switching system.',
+    example: ':server 12345678',
+    cat: 'server',
+    perms: ['Admin', 'Owner'],
+  },
+  {
+    name: ':whitelist',
+    syntax: ':whitelist <player> <role>',
+    desc: 'Adds a player to the whitelist with the specified admin role.',
+    example: ':whitelist PlayerName Moderator',
+    cat: 'whitelist',
+    perms: ['Owner'],
+  },
+  {
+    name: ':unwhitelist',
+    syntax: ':unwhitelist <player>',
+    desc: 'Removes a player from the whitelist, revoking their admin access.',
+    example: ':unwhitelist PlayerName',
+    cat: 'whitelist',
+    perms: ['Owner'],
+  },
+  {
+    name: ':announce',
+    syntax: ':announce <message>',
+    desc: 'Sends a server-wide announcement visible to all players.',
+    example: ':announce Server restart in 5 minutes!',
+    cat: 'utility',
+    perms: ['Moderator', 'Admin', 'Owner'],
+  },
+];
+
+const CAT_LABELS = {
+  moderation: '🚫 Moderation',
+  utility:    '🔧 Utility',
+  server:     '🌐 Server',
+  whitelist:  '📋 Whitelist',
+  fun:        '🎉 Fun',
+};
+
+let activeFilter = 'all';
+
+/* ── BUILD FILTERS ── */
+function buildFilters() {
+  const cats = ['all', ...new Set(COMMANDS.map(c => c.cat))];
+  document.getElementById('cmd-filters').innerHTML = cats.map(cat => `
+    <button class="cmd-filter${cat === 'all' ? ' active' : ''}" onclick="setFilter('${cat}')">
+      ${cat === 'all' ? '⊞ All' : (CAT_LABELS[cat] || cat)}
+    </button>`).join('');
+}
+
+function setFilter(cat) {
+  activeFilter = cat;
+  document.querySelectorAll('.cmd-filter').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(cat === 'all' ? 'all' : cat));
+  });
+  filterCmds();
+}
+
+/* ── BUILD + FILTER COMMANDS ── */
+function buildCmds() {
+  const list = document.getElementById('cmd-list');
+  list.innerHTML = COMMANDS.map((cmd, i) => `
+    <div class="cmd-card" id="cmd-${i}" data-name="${cmd.name.toLowerCase()}" data-desc="${cmd.desc.toLowerCase()}" data-cat="${cmd.cat}" onclick="toggleCmd(${i})">
+      <div class="cmd-header">
+        <span class="cmd-name">${cmd.name}</span>
+        <span class="cmd-syntax">${cmd.syntax}</span>
+        <span class="cmd-cat-badge">${CAT_LABELS[cmd.cat] || cmd.cat}</span>
+        <span class="cmd-arrow">▾</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-body-inner">
+          <div class="cmd-desc">${cmd.desc}</div>
+          <div class="cmd-example-label">Example</div>
+          <div class="cmd-example">${cmd.example}</div>
+          <div class="cmd-perms">${cmd.perms.map(p => `<span class="cmd-perm">${p}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleCmd(i) {
+  document.getElementById('cmd-' + i).classList.toggle('open');
+}
+
+function filterCmds() {
+  const q = document.getElementById('cmd-search').value.toLowerCase();
+  let vis = 0;
+  COMMANDS.forEach((cmd, i) => {
+    const el = document.getElementById('cmd-' + i);
+    const matchCat = activeFilter === 'all' || cmd.cat === activeFilter;
+    const matchQ = !q || cmd.name.toLowerCase().includes(q) || cmd.desc.toLowerCase().includes(q) || cmd.syntax.toLowerCase().includes(q);
+    const show = matchCat && matchQ;
+    el.classList.toggle('hidden', !show);
+    if (show) vis++;
+  });
+  document.getElementById('no-results').classList.toggle('vis', vis === 0 && q.length > 0);
+}
+
+buildFilters();
+buildCmds();
+</script>
+</body>
+</html>
