@@ -46,7 +46,7 @@ window.CC_CONFIG = {
   /* ── RELEASE COUNTDOWNS ──
      Set to null to hide a countdown entirely. */
   NEXT_RELEASE_CONCH: '2026-06-01T15:45:00Z',
-  NEXT_RELEASE_CMDR: '2026-07-10T15:45:00Z',
+  NEXT_RELEASE_CMDR: null,
   NEXT_RELEASE_SENTINEL: null,
 
   /* ── ADMIN ── */
@@ -61,7 +61,7 @@ window.CC_CONFIG = {
      get into the admin panel while the site is down for others).
      Admins (see ADMIN_USERNAME) always bypass the lock. */
   MAINTENANCE: {
-    ENABLED: true,
+    ENABLED: false,
     TITLE: 'Under Maintenance',
     MESSAGE: 'We\'re making some improvements right now. Check back shortly — or join our Discord for updates.',
     ALLOW: ['cc-control.html'],
