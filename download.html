@@ -3911,6 +3911,48 @@ function closeLiveBanner(){
   document.getElementById('live-release-banner').classList.remove('show');
 }
 
+/* ── AUTO UPDATE CHECK ──
+   Polls GitHub every 60 seconds. If a release appears that is newer
+   than the one the user saw when they first loaded the page, it shows
+   the live banner automatically. */
+(function startUpdateCheck(){
+  if(!window.CC_CONFIG||!window.CC_CONFIG.ENABLE_LIVE_RELEASE_BANNER)return;
+
+  let _knownLatest=null; // tag_name of the release when page loaded
+
+  async function fetchLatestRelease(){
+    try{
+      const r=await fetch(`https://api.github.com/repos/${window.CC_CONFIG.GITHUB_REPO}/releases?per_page=1`);
+      if(!r.ok)return null;
+      const rows=await r.json();
+      return rows&&rows.length?rows[0]:null;
+    }catch{return null;}
+  }
+
+  async function check(){
+    if(_liveBannerDismissed)return;
+    const latest=await fetchLatestRelease();
+    if(!latest)return;
+    if(_knownLatest===null){
+      /* First run — just remember what's current, don't show banner */
+      _knownLatest=latest.tag_name;
+      return;
+    }
+    if(latest.tag_name!==_knownLatest){
+      /* Something new dropped while the user was on the page */
+      _knownLatest=latest.tag_name;
+      showLiveBanner(latest);
+    }
+  }
+
+  /* Start checking after a short delay (let page load settle first) */
+  setTimeout(()=>{
+    check();
+    setInterval(check,60000);
+  },5000);
+})();
+
+
 /* ══════════════════════════════════════════════════════
    WELCOME INTRO — full carousel modal for new accounts
 ══════════════════════════════════════════════════════ */
