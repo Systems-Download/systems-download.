@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Status — Conch & Cmdr</title>
+<meta name="description" content="Live status page for Conch & Cmdr — check GitHub API and Supabase system health in real time.">
 
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -109,6 +110,16 @@
     .overall-wrap,.status-wrap,.refresh-row{padding-left:1.2rem;padding-right:1.2rem}
     .status-card{flex-wrap:wrap}
   }
+
+  /* Respect OS-level "reduce motion" accessibility setting automatically */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 <script>
 (function(){
@@ -120,6 +131,8 @@
   if(accent&&accent!=='#0ff4c6')document.documentElement.style.setProperty('--conch',accent);
 })();
 </script>
+<script src="config.js"></script>
+<script src="cc-errors.js"></script>
 </head>
 <body>
 
@@ -142,7 +155,7 @@
     <button class="icon-btn" id="refresh-btn-nav" onclick="checkAll()" title="Refresh">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
-    <button class="burger" id="burger-btn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
+    <button class="burger" id="burger-btn" onclick="toggleDrawer()" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -159,6 +172,7 @@
     <a class="drawer-item" href="sneakpeeks.html"><span class="drawer-icon">🖼️</span><span>Sneak Peeks</span></a>
     <a class="drawer-item active" href="status.html"><span class="drawer-icon">📡</span><span>Status</span></a>
     <a class="drawer-item" href="faq.html"><span class="drawer-icon">❓</span><span>FAQ</span></a>
+    <a class="drawer-item" href="sentinel.html"><span class="drawer-icon" style="color:var(--sentinel,#ff3da6)">◈</span><span>Sentinel</span></a>
     <div class="drawer-div"></div>
     <a class="drawer-item" href="changelog.html"><span class="drawer-icon">📋</span><span>Changelog</span></a>
     <a class="drawer-item" href="settings.html"><span class="drawer-icon">⚙️</span><span>Settings</span></a>
@@ -216,11 +230,7 @@
 <footer>Conch & Cmdr — Status monitoring runs client-side, checks reflect your own connection too.</footer>
 
 <script>
-const CONFIG={
-  GITHUB_REPO:'Systems-Download/Systems-Download.github.io',
-  SB_URL:'https://rmdkoauibmzhgnvrwhfd.supabase.co',
-  SB_KEY:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw'
-};
+const CONFIG = window.CC_CONFIG || {};
 
 /* ── DRAWER ── */
 let _dopen=false;
