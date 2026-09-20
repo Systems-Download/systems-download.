@@ -237,23 +237,13 @@ const FALLBACK_ANNOUNCEMENTS = [
     footerText: 'Check the DC for information!',
   },
   {
-    pinned: false,
+    pinned: true,
     icon: '📱',
     type: 'info',
     title: 'Mobile Version',
     body: 'We are announcing that, there will be a Mobile Version of Cmdr downloadable soon here on the Website and the Discord!',
     created_by: 'Systems Download',
     created_at: '2026-07-15',
-    footerText: 'Announced here and on the Discord Server',
-  },
-  {
-    pinned: true,
-    icon: '📜',
-    type: 'info',
-    title: 'Cmdr V4.4',
-    body: 'Cmdr V4.4 will only be an Addon to V4.3! That means V4.4 will not be an really big update! It will Release this September',
-    created_by: 'Systems Download',
-    created_at: '2026-09-15',
     footerText: 'Announced here and on the Discord Server',
   },
 ];
@@ -288,6 +278,7 @@ const FALLBACK_ANNOUNCEMENTS = [
     <a class="drawer-item" href="download.html" onclick="closeDrawer()"><span class="drawer-icon">📥</span>Downloads</a>
     <a class="drawer-item active" href="announcements.html" onclick="closeDrawer()"><span class="drawer-icon">📣</span>Announcements</a>
     <a class="drawer-item" href="https://systems-download.github.io/faq.html" onclick="closeDrawer()"><span class="drawer-icon">❓</span>FAQ</a>
+    <a class="drawer-item" href="sentinel.html" onclick="closeDrawer()"><span class="drawer-icon" style="color:var(--sentinel,#ff3da6)">◈</span>Sentinel</a>
     <div class="drawer-divider"></div>
     <p class="drawer-section-label">Settings</p>
     <a class="drawer-item" href="download.html" onclick="closeDrawer()"><span class="drawer-icon">👤</span>My Profile</a>
