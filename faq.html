@@ -146,6 +146,7 @@ footer{text-align:center;padding:3rem 2rem;font-family:var(--mono);font-size:.7r
     <a class="drawer-item" href="download.html" onclick="closeDrawer()"><span class="drawer-icon">📥</span>Downloads</a>
     <a class="drawer-item" href="announcements.html" onclick="closeDrawer()"><span class="drawer-icon">📣</span>Announcements</a>
     <a class="drawer-item active" href="faq.html" onclick="closeDrawer()"><span class="drawer-icon">❓</span>FAQ</a>
+    <a class="drawer-item" href="sentinel.html" onclick="closeDrawer()"><span class="drawer-icon" style="color:var(--sentinel,#ff3da6)">◈</span>Sentinel</a>
     <div class="drawer-div"></div>
     <p class="drawer-slabel">Quick Jump</p>
     <a class="drawer-item" href="download.html#conch" onclick="closeDrawer()"><span class="drawer-icon" style="color:var(--conch)">◈</span>Conch</a>
@@ -216,15 +217,18 @@ const FAQ = [
       { icon: '📁', q: 'What file format are the downloads?', a: 'All files are <code>.rbxm</code> format — Roblox Model files. You can import them directly into Roblox Studio via File → Import from File.' },
       { icon: '🔄', q: 'How do I get the latest version?', a: 'The page always shows the latest release at the top. If you think something is outdated, click the 🔄 Refresh button in the navigation bar to reload releases from GitHub.' },
       { icon: '📋', q: 'How do I see older versions?', a: 'Click the <code>History ▾</code> button on any file card to expand a list of all previous versions with individual download buttons.' },
+      { icon: '⚡', q: 'Why does the page sometimes show a banner about a new release?', a: 'The site checks automatically every 60 seconds whether a new version has been published. If something drops while you have the page open, a banner appears so you can reload and grab it immediately.' },
     ]
   },
   {
     cat: '🧩 Conch & Cmdr',
     items: [
-      { icon: '❓', q: 'What is Conch?', a: 'Conch is a Roblox system built and maintained by Systems-Download. Check the Announcements page for the latest details and changelogs.' },
-      { icon: '❓', q: 'What is Cmdr?', a: 'Cmdr is a companion system to Conch. Both are distributed as <code>.rbxm</code> files and can be imported into Roblox Studio.' },
+      { icon: '❓', q: 'What is Conch?', a: 'Conch is a Roblox admin system by Systems-Download, built on the open-source Conch console engine. It uses a shell-like scripting language for fast, flexible in-game commands.' },
+      { icon: '❓', q: 'What is Cmdr?', a: 'Cmdr is a companion system built on the open-source Cmdr framework. It uses a type-safe command syntax with autocomplete and client + server validation.' },
+      { icon: '◈', q: 'What is Sentinel?', a: 'Sentinel is a fully original admin panel by Systems-Download — not built on any open-source engine. It has a classic command-line style interface, custom UI, autocomplete, client + server validation, and built-in systems like whitelisting and server switching. <a href="sentinel.html">Learn more →</a>' },
       { icon: '🔢', q: 'What do the version numbers mean?', a: 'Versions follow semantic versioning: <code>v1.0.0</code> — major.minor.patch. Higher numbers = newer. BETA versions are pre-release and may contain bugs.' },
       { icon: '🚀', q: 'How often are new versions released?', a: 'Releases happen as updates are ready. Check the Announcements page or join the Discord server to get notified.' },
+      { icon: '🔀', q: 'Can I use Conch and Cmdr in the same game?', a: 'Yes — they are separate systems and can run side by side in the same place without conflicts.' },
     ]
   },
   {
@@ -232,31 +236,43 @@ const FAQ = [
     items: [
       { icon: '🌍', q: 'How does the site load files?', a: 'Files are automatically fetched from GitHub Releases using the public GitHub API. No manual updates needed — when a new release is published on GitHub, it appears here automatically.' },
       { icon: '🔒', q: 'Are the downloads safe?', a: 'Yes. Files come directly from the official GitHub repository. You can verify file integrity using the SHA256 checksums shown in the GitHub Releases page.' },
-      { icon: '📱', q: 'Can I install this page as an app?', a: 'No! This site is only Availible over the Link. You can find the Link over the Youtube Channel in the Bio or the Discord Server.' },
+      { icon: '📱', q: 'Can I install this page as an app?', a: 'The site is only available via the link. You can find it in the YouTube channel bio or the Discord server.' },
       { icon: '🌐', q: 'The page shows in the wrong language — how do I change it?', a: 'Use the language selector in the top navigation bar on the Downloads page. Your choice is saved and applied automatically on your next visit. The site also auto-detects your browser language.' },
+      { icon: '🏗️', q: 'How do I import a .rbxm file into Roblox Studio?', a: 'Open your place in Roblox Studio, go to <code>File → Import from File</code>, and select the downloaded <code>.rbxm</code> file. It will appear in the Explorer panel, ready to use.' },
+      { icon: '🔑', q: 'Why do I need an account to download?', a: 'An account lets us verify who is downloading and enforce bans against users who abuse or redistribute the files. Registration is free and takes under a minute.' },
+      { icon: '🖥️', q: 'Which Roblox Studio version do I need?', a: 'Any up-to-date version of Roblox Studio works. We recommend always keeping Studio updated via the Roblox installer — older versions may have compatibility issues with newer releases.' },
+      { icon: '☁️', q: 'Does the site work offline?', a: 'No — the Downloads page fetches live data from GitHub and Supabase, so an internet connection is required. The FAQ and Changelog pages work mostly offline if already cached by your browser.' },
     ]
   },
   {
     cat: '🔧 Troubleshooting',
     items: [
       { icon: '❌', q: 'The download does not start — what do I do?', a: 'Try clicking Download again. If it still does not work, check your browser\'s download settings or try a different browser. Some browsers block automatic file downloads — allow it when prompted.' },
-      { icon: '🔄', q: 'The file list is empty or shows an error', a: 'This usually means the GitHub API rate limit was exceeded (60 requests/hour for unauthenticated users). Wait a few minutes and click the 🔄 Refresh button.' },
+      { icon: '🔄', q: 'The file list is empty or shows an error', a: 'This usually means the GitHub API rate limit was exceeded. Wait a few minutes and click the 🔄 Refresh button.' },
+      { icon: '🔐', q: 'I am logged in but the site still shows a login wall', a: 'Try clearing your browser cache and cookies for this site, then log in again. If the issue persists, your session may have expired — logging out and back in fixes this in most cases.' },
+      { icon: '🚫', q: 'I got a ban message but I did not do anything wrong', a: 'Bans can sometimes be triggered by shared IP addresses (e.g. public Wi-Fi or a VPN). If you believe this is a mistake, join the Discord server to appeal.' },
+      { icon: '📂', q: 'The .rbxm file does not appear after importing in Studio', a: 'Check the Explorer panel — it may have been imported into an unexpected location (e.g. inside an existing object). Try importing into a blank baseplate to confirm the file is working correctly.' },
+      { icon: '🐢', q: 'The site loads slowly', a: 'The Downloads page fetches data from GitHub and our database on load — this usually takes under 2 seconds on a normal connection. If it consistently loads slowly, check the Status page to see if any services are experiencing issues.' },
     ]
   },
   {
     cat: '💬 Community',
     items: [
       { icon: '💬', q: 'Where can I get support?', a: 'Join the <a href="https://discord.gg/6zxpMDbecq" target="_blank">Discord server</a> for direct support, announcements and community discussion.' },
-      { icon: '🐛', q: 'How do I report a bug?', a: 'Go on https://systems-download.github.io/bugreport.html or open a ticket in the Discord server support channel.' },
-      { icon: '💡', q: 'Can I suggest features?', a: 'Absolutely! Post your ideas in the Discord server. We read all suggestions. The Creator or the Co Creators will check your Ideas and will insert it if possible.' },
+      { icon: '🐛', q: 'How do I report a bug?', a: 'Use the <a href="bugreport.html">Bug Report page</a> or open a ticket in the Discord server support channel. Please include steps to reproduce the bug and your browser/OS details.' },
+      { icon: '💡', q: 'Can I suggest features?', a: 'Absolutely — post your ideas in the Discord server. The Creator and Co-Creators read all suggestions and add them if possible.' },
+      { icon: '📣', q: 'How do I stay up to date with new releases?', a: 'Join the Discord server and enable notifications for the announcements channel. You can also check the <a href="announcements.html">Announcements</a> and <a href="changelog.html">Changelog</a> pages regularly.' },
+      { icon: '👀', q: 'Where can I see what is coming next?', a: 'Check the <a href="sneakpeeks.html">Sneak Peeks</a> page for early previews of upcoming features and updates.' },
     ]
   },
   {
-    cat: '🌐 Other Questions ',
+    cat: '🌐 Other Questions',
     items: [
-      { icon: '💬', q: 'Can i Resell it?', a: 'No! Reselling Cmdr or Conch is not allowed. If you do it, you will get an Permanent Ban from the Discord & Website' },
-      { icon: '©', q: 'Can i get rights to any version?', a: 'Mostly No, the Owner of it does not give anyone Rights to any Version,Website etc.' },
-      { icon: '?', q: 'Can i Appeal an Ban?', a: 'Yes, you can Appeal an ban. Temporary bans -1+ day- wont be accepted. You can appeal Permanent Bans.' },
+      { icon: '💬', q: 'Can I resell these files?', a: 'No. Reselling Conch, Cmdr, or Sentinel is strictly prohibited. Doing so will result in a permanent ban from the Discord server and the website.' },
+      { icon: '©', q: 'Can I get rights to any version?', a: 'No — Systems-Download does not transfer rights to any version, file, or part of the website. Conch and Cmdr build on MIT-licensed open-source engines (credit to their original authors); Sentinel is fully original.' },
+      { icon: '⚖️', q: 'Can I use these tools in a commercial Roblox game?', a: 'Yes — you are free to use Conch, Cmdr, and Sentinel in your own Roblox games, including monetised ones, as long as you do not resell or redistribute the files themselves.' },
+      { icon: '🔓', q: 'Can I appeal a ban?', a: 'Yes. Temporary bans of one day or less are not eligible for appeal. Permanent bans can be appealed by joining the Discord server and opening a support ticket.' },
+      { icon: '🔗', q: 'Can I share a link to the download page?', a: 'Yes — share <code>https://cccdownload.vercel.app</code> freely. Just note that visitors need to create a free account before they can download files.' },
     ]
   },
 ];
