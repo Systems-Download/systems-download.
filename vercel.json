@@ -1,0 +1,16 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/sentinel", "destination": "/sentinel.html" },
+    { "source": "/download", "destination": "/download.html" },
+    { "source": "/announcements", "destination": "/announcements.html" },
+    { "source": "/changelog", "destination": "/changelog.html" },
+    { "source": "/sneakpeeks", "destination": "/sneakpeeks.html" },
+    { "source": "/status", "destination": "/status.html" },
+    { "source": "/settings", "destination": "/settings.html" },
+    { "source": "/faq", "destination": "/faq.html" },
+    { "source": "/bugreport", "destination": "/bugreport.html" },
+    { "source": "/messages", "destination": "/messages.html" }
+  ]
+}
