@@ -40,7 +40,7 @@ window.CC_CONFIG = {
      Separate webhook for automatic release announcements.
      Replace the URL below with your new webhook after revoking the old one.
      Set RELEASE_PING_ROLE_ID to your role ID to ping it on each release. */
-  RELEASE_WEBHOOK: 'PASTE_NEW_WEBHOOK_URL_HERE',
+  RELEASE_WEBHOOK: 'https://discordapp.com/api/webhooks/1550553424884535329/xgCYhIqsRudd16ZUSvMMApX4sRhZqAjbLv8EJ6R9tZNVacgBa1dzaES6W8OQO6pEsoFV',
   RELEASE_PING_ROLE_ID: '1480242594448539812',
 
   /* ── RELEASE COUNTDOWNS ──
