@@ -438,19 +438,19 @@ window.CC_CONFIG = {
       dialog=document.createElement('dialog');
       dialog.className='cc-theme-picker';dialog.setAttribute('aria-labelledby','cc-theme-title');
       dialog.innerHTML=`
-        <div class="cc-theme-heading"><h2 id="cc-theme-title">Make it yours</h2><button type="button" class="cc-theme-close" aria-label="Close theme selection">×</button></div>
-        <p>Choose a finish, then add your color.</p>
-        <div class="cc-theme-options" role="group" aria-label="Theme finish">
-          <button type="button" class="cc-theme-choice" data-glass="0"><span class="cc-theme-sample" aria-hidden="true"><i></i><i></i></span><strong>Classic</strong></button>
+        <div class="cc-theme-heading"><h2 id="cc-theme-title" data-t="theme_title">Make it yours</h2><button type="button" class="cc-theme-close" aria-label="Close theme selection" data-t-aria-label="close">×</button></div>
+        <p data-t="theme_sub">Choose a finish, then add your color.</p>
+        <div class="cc-theme-options" role="group" aria-label="Theme finish" data-t-aria-label="choose_theme">
+          <button type="button" class="cc-theme-choice" data-glass="0"><span class="cc-theme-sample" aria-hidden="true"><i></i><i></i></span><strong data-t="classic">Classic</strong></button>
           <button type="button" class="cc-theme-choice" data-glass="1"><span class="cc-theme-sample cc-theme-sample-glass" aria-hidden="true"><i></i><i></i></span><strong>Liquid Glass</strong></button>
         </div>
-        <p>Appearance</p><div class="cc-theme-modes" role="group" aria-label="Color scheme">
-          <button type="button" data-mode="dark">Dark</button><button type="button" data-mode="light">Light</button><button type="button" data-mode="system">System</button>
+        <p data-t="appearance">Appearance</p><div class="cc-theme-modes" role="group" aria-label="Color scheme" data-t-aria-label="appearance">
+          <button type="button" data-mode="dark" data-t="mode_dark">Dark</button><button type="button" data-mode="light" data-t="mode_light">Light</button><button type="button" data-mode="system" data-t="mode_system">System</button>
         </div>
-        <p>Accent color</p><div class="cc-theme-colors" role="group" aria-label="Accent color">${palette.map(([name,color])=>`<button type="button" class="cc-theme-color" data-accent="${color}" style="background:${color}" aria-label="${name}"></button>`).join('')}</div>
-        <label class="cc-theme-custom" for="cc-custom-accent"><input type="color" id="cc-custom-accent">Custom color</label>
-        <p data-status role="status">Changes are saved in this browser.</p>
-        <button type="button" class="cc-theme-done" style="margin-top:1rem">Done</button>`;
+        <p data-t="accent_color">Accent color</p><div class="cc-theme-colors" role="group" aria-label="Accent color" data-t-aria-label="accent_color">${palette.map(([name,color])=>`<button type="button" class="cc-theme-color" data-accent="${color}" style="background:${color}" aria-label="${name}"></button>`).join('')}</div>
+        <label class="cc-theme-custom" for="cc-custom-accent"><input type="color" id="cc-custom-accent"><span data-t="custom_color">Custom color</span></label>
+        <p data-status role="status" data-t="saved_browser">Changes are saved in this browser.</p>
+        <button type="button" class="cc-theme-done" style="margin-top:1rem" data-t="done">Done</button>`;
       dialog.querySelectorAll('[data-glass]').forEach(el=>el.onclick=()=>set({cc_liquid_glass:el.dataset.glass}));
       dialog.querySelectorAll('[data-mode]').forEach(el=>el.onclick=()=>set(el.dataset.mode==='system' ? {cc_system_theme:'1'} : {cc_system_theme:'0',cc_theme:el.dataset.mode}));
       dialog.querySelectorAll('[data-accent]').forEach(el=>el.onclick=()=>set({cc_accent:el.dataset.accent}));
@@ -465,6 +465,7 @@ window.CC_CONFIG = {
       document.body.appendChild(dialog);
     }
     dialog._trigger=trigger||document.activeElement;
+    window.CC_I18N?.apply(dialog);
     syncPicker();dialog.showModal();
   }
   window.CC_THEME={state,apply,set,openPicker,colorCSS(value){const el=document.createElement('span');el.style.color=value;return el.style.color;}};
@@ -547,10 +548,11 @@ window.CC_CONFIG = {
     document.querySelectorAll('.drawer-nav').forEach(menu=>{
       if(menu.querySelector('a[href="questions.html"]'))return;
       const link=document.createElement('a');link.className='drawer-item';link.href='questions.html';
-      link.innerHTML='<span class="drawer-icon">💬</span><span>Questions</span>';
+      link.innerHTML='<span class="drawer-icon">💬</span><span data-t="nav_questions">Questions</span>';
       link.onclick=()=>{if(typeof window.closeDrawer==='function')window.closeDrawer();};
       const settings=menu.querySelector('a[href="settings.html"]');
       if(settings)settings.after(link);else menu.appendChild(link);
+      window.CC_I18N?.apply(link);
     });
   },{once:true});
 })();
@@ -614,6 +616,13 @@ window.CC_CONFIG = {
   }
   window.CC_GITHUB={releases};
 })();
+
+/* Pages already using i18n.js reuse it; other pages load the shared navigation labels. */
+if(!window.CC_I18N&&!document.querySelector('script[src$="i18n.js"]')){
+  const languageScript=document.createElement('script');
+  languageScript.src=new URL('i18n.js',document.currentScript?.src||location.href).href;
+  document.head.appendChild(languageScript);
+}
 
 
 

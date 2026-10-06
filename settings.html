@@ -101,39 +101,39 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 </head>
 <body>
 
-<div class="save-toast" id="save-toast">✓ Settings saved</div>
+<div class="save-toast" id="save-toast">✓ <span data-t="settings_saved">Settings saved</span></div>
 
 <nav>
   <a class="nav-logo" href="download.html"><span class="c">Conch</span><span class="s">/</span><span class="r">Cmdr</span></a>
-  <a class="nav-back" href="download.html">← Back</a>
+  <a class="nav-back" href="download.html">← <span data-t="back">Back</span></a>
 </nav>
 
 <div class="page">
-  <div class="page-title">⚙️ <em>Settings</em></div>
-  <div class="page-sub">Your preferences are saved locally and applied across all pages.</div>
+  <div class="page-title">⚙️ <em data-t="settings_title">Settings</em></div>
+  <div class="page-sub" data-t="settings_sub">Your preferences are saved locally and applied across all pages.</div>
 
   <!-- APPEARANCE -->
   <div class="settings-section">
     <div class="settings-section-header">
       <span class="settings-section-icon">🎨</span>
-      <span class="settings-section-title">Appearance</span>
+      <span class="settings-section-title" data-t="appearance">Appearance</span>
     </div>
 
     <div class="setting-row">
       <div class="setting-left">
-        <div class="setting-label">Dark Mode</div>
-        <div class="setting-desc">Switch between dark and light theme</div>
+        <div class="setting-label" data-t="dark_mode">Dark Mode</div>
+        <div class="setting-desc" data-t="dark_desc">Switch between dark and light theme</div>
       </div>
       <label class="toggle-wrap">
-        <input type="checkbox" class="toggle-input" id="s-darkmode" aria-label="Dark Mode" onchange="save('cc_system_theme','0');document.getElementById('s-systemtheme').checked=false;save('cc_theme',this.checked?'dark':'light');applyTheme()">
+        <input type="checkbox" class="toggle-input" id="s-darkmode" aria-label="Dark Mode" data-t-aria-label="dark_mode" onchange="save('cc_system_theme','0');document.getElementById('s-systemtheme').checked=false;save('cc_theme',this.checked?'dark':'light');applyTheme()">
         <span class="toggle-slider"></span>
       </label>
     </div>
 
     <div class="setting-row">
       <div class="setting-left">
-        <div class="setting-label">System Theme</div>
-        <div class="setting-desc">Automatically match your OS dark/light preference</div>
+        <div class="setting-label" data-t="system_theme">System Theme</div>
+        <div class="setting-desc" data-t="system_desc">Automatically match your OS dark/light preference</div>
       </div>
       <label class="toggle-wrap">
         <input type="checkbox" class="toggle-input" id="s-systemtheme" onchange="save('cc_system_theme',this.checked?'1':'0');applyTheme()">
@@ -144,7 +144,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
     <div class="setting-row">
       <div class="setting-left">
         <div class="setting-label">Liquid Glass</div>
-        <div class="setting-desc">Translucent panels, soft reflections and depth. Off by default; your choice is saved in this browser.</div>
+        <div class="setting-desc" data-t="glass_desc">Translucent panels, soft reflections and depth. Off by default; your choice is saved in this browser.</div>
       </div>
       <label class="toggle-wrap">
         <input type="checkbox" class="toggle-input" id="s-liquid-glass" aria-label="Liquid Glass" onchange="save('cc_liquid_glass',this.checked?'1':'0');applyTheme()">
@@ -153,16 +153,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
     </div>
     <div class="setting-row">
       <div class="setting-left">
-        <div class="setting-label">Theme Preview</div>
-        <div class="setting-desc">Preview Classic or Liquid Glass with any accent color</div>
+        <div class="setting-label" data-t="theme_preview">Theme Preview</div>
+        <div class="setting-desc" data-t="preview_desc">Preview Classic or Liquid Glass with any accent color</div>
       </div>
-      <button type="button" class="connected-save-btn" onclick="CC_THEME.openPicker(this)">Choose theme</button>
+      <button type="button" class="connected-save-btn" data-t="choose_theme" onclick="CC_THEME.openPicker(this)">Choose theme</button>
     </div>
 
     <div class="setting-row">
       <div class="setting-left">
-        <div class="setting-label">Accent Color</div>
-        <div class="setting-desc">Your personal accent color across the site</div>
+        <div class="setting-label" data-t="accent_color">Accent Color</div>
+        <div class="setting-desc" data-t="accent_desc">Your personal accent color across the site</div>
       </div>
       <div class="color-grid" id="color-grid"></div>
     </div>
@@ -183,25 +183,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
   <div class="settings-section">
     <div class="settings-section-header">
       <span class="settings-section-icon">🌐</span>
-      <span class="settings-section-title">Language</span>
+      <span class="settings-section-title" data-t="language">Language</span>
     </div>
     <div class="setting-row">
       <div class="setting-left">
-        <div class="setting-label">Display Language</div>
-        <div class="setting-desc">Language used for the interface</div>
+        <div class="setting-label" data-t="display_language">Display Language</div>
+        <div class="setting-desc" data-t="language_desc">Language used for the interface</div>
       </div>
-      <select class="setting-select" id="s-lang" onchange="save('cc_lang',this.value);if(typeof applyTranslations!=='undefined')applyTranslations()">
-        <option value="en">🇬🇧 English</option>
-        <option value="de">🇩🇪 Deutsch</option>
-        <option value="es">🇪🇸 Español</option>
-        <option value="fr">🇫🇷 Français</option>
-        <option value="it">🇮🇹 Italiano</option>
-        <option value="pt">🇧🇷 Português</option>
-        <option value="ru">🇷🇺 Русский</option>
-        <option value="ja">🇯🇵 日本語</option>
-        <option value="zh">🇨🇳 中文</option>
-        <option value="ko">🇰🇷 한국어</option>
-      </select>
+      <select class="setting-select" id="s-lang" data-language-select onchange="save('cc_lang',this.value)" aria-label="Display language"></select>
     </div>
   </div>
 
@@ -510,7 +499,7 @@ const DEFAULTS={
 function get(key){return localStorage.getItem(key)??DEFAULTS[key];}
 
 function save(key,value){
-  localStorage.setItem(key,value);
+  if(key==='cc_lang')CC_I18N.setLanguage(value);else localStorage.setItem(key,value);
   showSaveToast();
 }
 
@@ -631,7 +620,8 @@ function loadSettings(){
   document.getElementById('s-liquid-glass').checked=get('cc_liquid_glass')==='1';
 
   /* Language */
-  document.getElementById('s-lang').value=get('cc_lang');
+  CC_I18N.apply();
+  document.getElementById('s-lang').value=CC_I18N.language;
 
   /* Toggles */
   const toggleMap={
@@ -684,6 +674,7 @@ function setAccent(value,dot){
 function resetAll(){
   if(!confirm('Reset all settings to defaults?'))return;
   Object.entries(DEFAULTS).forEach(([key,val])=>localStorage.setItem(key,val));
+  CC_I18N.setLanguage(DEFAULTS.cc_lang);
   loadSettings();
 loadConnectedAccounts();
   showSaveToast();

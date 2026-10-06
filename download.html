@@ -1071,7 +1071,7 @@ async function doRegister(){
     if(isVPN){
       await sbFetch('/rest/v1/cc_bans',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({ip,reason:'VPN/Proxy detected during registration',banned_by:'system',banned_at:new Date().toISOString()})}).catch(()=>{});
       setAuthErr('reg','🚫 VPN/Proxy detected. Please disable your VPN and try again.');
-      btn.disabled=false;btn.textContent='Register';return;
+      btn.disabled=false;btn.textContent=t('register_btn');return;
     }
 
     /* Check if IP is banned */
@@ -1081,7 +1081,7 @@ async function doRegister(){
     /* Check if username exists */
     const checkName=await sbFetch(`/rest/v1/cc_users?username=eq.${encodeURIComponent(name.toLowerCase())}&select=id`);
     const nameData=await checkName.json();
-    if(nameData&&nameData.length>0){setAuthErr('reg','Username already taken.');btn.disabled=false;btn.textContent='Register';return;}
+    if(nameData&&nameData.length>0){setAuthErr('reg','Username already taken.');btn.disabled=false;btn.textContent=t('register_btn');return;}
 
     /* Check if IP already has an account */
     const checkIP=await sbFetch(`/rest/v1/cc_users?ip=eq.${encodeURIComponent(ip)}&select=id`);
@@ -1105,7 +1105,7 @@ async function doRegister(){
 
     if(ins.ok||ins.status===201||ins.status===204){
       ok.textContent='Account created! You can now log in.';ok.classList.add('vis');
-      btn.disabled=false;btn.textContent='Register';
+      btn.disabled=false;btn.textContent=t('register_btn');
       setTimeout(()=>{
         switchTab('login');
         document.getElementById('login-name').value=name;
@@ -1113,7 +1113,7 @@ async function doRegister(){
     }else{
       const errBody=await ins.json().catch(()=>({}));
       setAuthErr('reg','Registration failed: '+(errBody.message||ins.status));
-      btn.disabled=false;btn.textContent='Register';
+      btn.disabled=false;btn.textContent=t('register_btn');
     }
   }catch(e){
     const msg=e&&e.message?e.message:'';
@@ -1122,7 +1122,7 @@ async function doRegister(){
     }else{
       setAuthErr('reg','Something went wrong. Please try again. ('+(msg||'unknown error')+')');
     }
-    btn.disabled=false;btn.textContent='Register';
+    btn.disabled=false;btn.textContent=t('register_btn');
   }
 }
 
@@ -1236,7 +1236,7 @@ async function doLogin(){
       /* Auto-ban VPN IP */
       await sbFetch('/rest/v1/cc_bans',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({ip,reason:'VPN/Proxy detected',banned_by:'system',banned_at:new Date().toISOString()})}).catch(()=>{});
       setAuthErr('login','🚫 VPN/Proxy detected. Please disable your VPN and try again.');
-      btn.disabled=false;btn.textContent='Login';return;
+      btn.disabled=false;btn.textContent=t('login_btn');return;
     }
 
     /* Check ban */
@@ -1247,12 +1247,12 @@ async function doLogin(){
 
     /* Fetch user */
     const r=await sbFetch(`/rest/v1/cc_users?username=eq.${encodeURIComponent(name.toLowerCase())}&select=id,username,display_name,password_hash,ip,ip_locked,is_banned,is_frozen,freeze_reason,temp_ban_until,temp_ban_reason,failed_attempts,locked_until,role`);
-    if(!r.ok){setAuthErr('login','Server error. Please try again later.');btn.disabled=false;btn.textContent='Login';return;}
+    if(!r.ok){setAuthErr('login','Server error. Please try again later.');btn.disabled=false;btn.textContent=t('login_btn');return;}
     const users=await r.json().catch(()=>[]);
 
-    if(!users||!Array.isArray(users)||users.length===0){setAuthErr('login','Username not found.');btn.disabled=false;btn.textContent='Login';return;}
+    if(!users||!Array.isArray(users)||users.length===0){setAuthErr('login','Username not found.');btn.disabled=false;btn.textContent=t('login_btn');return;}
     const user=users[0];
-    if(!user||typeof user!=='object'){setAuthErr('login','Username not found.');btn.disabled=false;btn.textContent='Login';return;}
+    if(!user||typeof user!=='object'){setAuthErr('login','Username not found.');btn.disabled=false;btn.textContent=t('login_btn');return;}
 
     if(user.is_banned){
       showBanWall(ip,'Your account has been banned.');
@@ -1263,7 +1263,7 @@ async function doLogin(){
     if(user.locked_until&&new Date(user.locked_until)>new Date()){
       const remaining=Math.ceil((new Date(user.locked_until)-Date.now())/60000);
       setAuthErr('login',`🔒 Account locked. Try again in ${remaining} minute${remaining!==1?'s':''}.`);
-      btn.disabled=false;btn.textContent='Login';return;
+      btn.disabled=false;btn.textContent=t('login_btn');return;
     }
 
     if(user.password_hash!==hash){
@@ -1279,7 +1279,7 @@ async function doLogin(){
       }else{
         setAuthErr('login',`Wrong password. ${5-fails} attempt${5-fails!==1?'s':''} remaining.`);
       }
-      btn.disabled=false;btn.textContent='Login';return;
+      btn.disabled=false;btn.textContent=t('login_btn');return;
     }
     /* Reset failed attempts on success */
     await sbFetch(`/rest/v1/cc_users?id=eq.${user.id}`,{
@@ -1293,20 +1293,20 @@ async function doLogin(){
     /* ── FROZEN ACCOUNT CHECK ── */
     if(user.is_frozen){
       setAuthErr('login','🧊 This account has been frozen. Reason: '+(user.freeze_reason||'Under review')+'. Contact support for help.');
-      btn.disabled=false;btn.textContent='Login';return;
+      btn.disabled=false;btn.textContent=t('login_btn');return;
     }
 
     /* ── TEMP BAN CHECK ── */
     if(user.temp_ban_until&&new Date(user.temp_ban_until)>new Date()){
       const remaining=Math.ceil((new Date(user.temp_ban_until)-Date.now())/3600000);
       setAuthErr('login',`⏱ This account is temporarily banned for ${remaining} more hour${remaining!==1?'s':''}. Reason: ${user.temp_ban_reason||'—'}`);
-      btn.disabled=false;btn.textContent='Login';return;
+      btn.disabled=false;btn.textContent=t('login_btn');return;
     }
 
     /* ── IP LOCK — block login from different IP (except user 'max' or accounts with ip_locked=false) ── */
     if(user.username!=='max'&&user.ip_locked!==false&&user.ip&&user.ip!=='unknown'&&ip!=='unknown'&&user.ip!==ip){
       setAuthErr('login','⚠️ Login blocked. This account was registered from a different IP address. Contact support if this is an error.');
-      btn.disabled=false;btn.textContent='Login';return;
+      btn.disabled=false;btn.textContent=t('login_btn');return;
     }
 
     /* Update IP on login (and log it for tracking, even for ip_locked=false accounts) */
@@ -1371,7 +1371,7 @@ async function doLogin(){
     }else{
       setAuthErr('login','Something went wrong. Please try again. ('+(msg||'unknown error')+')');
     }
-    btn.disabled=false;btn.textContent='Login';
+    btn.disabled=false;btn.textContent=t('login_btn');
   }
 }
 
@@ -1516,29 +1516,15 @@ async function initAuth(){
 /* ═══════════════════════════════════════════════════════════
    TRANSLATIONS
 ═══════════════════════════════════════════════════════════ */
-const T={
-  en:{nav_dl:'Downloads',nav_ann:'Announcements',hero_sub:'Files are automatically loaded from GitHub Releases. All .rbxm files are detected and sorted.',desc_c:'All .rbxm files with "Conch" in the name.',desc_r:'All .rbxm files with "Cmdr" in the name.',srch_c:'Search Conch files...',srch_r:'Search Cmdr files...',bdl:'Downloads',bnew:'NEW',hist:'History',hist_lbl:'Previous versions',dl:'↓ Download',vcount:n=>`${n} versions`,dlc:n=>`${n} dl`,t_start:'Download started',t_done:'Download complete',t_prog:'Downloading...',t_ref:'Refreshing...',t_ref2:'Fetching latest releases',t_upd:'Up to date',t_upd2:'Releases reloaded',t_cp:'Link copied!',t_cp2:'Download link in clipboard',empty:s=>`No ${s} files found.`,empty_h:s=>`Make sure .rbxm files contain "${s}" in the filename.`,se:'No files match your search.',e404:'Repo not found or no Releases yet.',e403:'GitHub API rate limit exceeded. Try again later.',egn:'Error: ',footer:'Automatically loaded from GitHub Releases',dfooter:'Auto-updated from GitHub Releases'},
-  de:{nav_dl:'Downloads',nav_ann:'Ankündigungen',hero_sub:'Dateien werden automatisch von GitHub Releases geladen.',desc_c:'Alle .rbxm Dateien mit "Conch" im Namen.',desc_r:'Alle .rbxm Dateien mit "Cmdr" im Namen.',srch_c:'Conch Dateien suchen...',srch_r:'Cmdr Dateien suchen...',bdl:'Downloads',bnew:'NEU',hist:'Verlauf',hist_lbl:'Frühere Versionen',dl:'↓ Herunterladen',vcount:n=>`${n} Versionen`,dlc:n=>`${n} Dl`,t_start:'Download gestartet',t_done:'Download abgeschlossen',t_prog:'Lädt herunter...',t_ref:'Wird aktualisiert...',t_ref2:'Neueste Releases werden geladen',t_upd:'Aktuell',t_upd2:'Releases neu geladen',t_cp:'Link kopiert!',t_cp2:'Link in Zwischenablage',empty:s=>`Keine ${s} Dateien gefunden.`,empty_h:s=>`Stelle sicher, dass .rbxm Dateien "${s}" im Namen haben.`,se:'Keine Dateien gefunden.',e404:'Repo nicht gefunden oder keine Releases.',e403:'GitHub API Rate-Limit erreicht.',egn:'Fehler: ',footer:'Automatisch von GitHub Releases geladen',dfooter:'Automatisch von GitHub Releases aktualisiert'},
-  es:{nav_dl:'Descargas',nav_ann:'Anuncios',hero_sub:'Los archivos se cargan automáticamente desde GitHub Releases.',desc_c:'Todos los archivos .rbxm con "Conch".',desc_r:'Todos los archivos .rbxm con "Cmdr".',srch_c:'Buscar Conch...',srch_r:'Buscar Cmdr...',bdl:'Descargas',bnew:'NUEVO',hist:'Historial',hist_lbl:'Versiones anteriores',dl:'↓ Descargar',vcount:n=>`${n} versiones`,dlc:n=>`${n} dl`,t_start:'Descarga iniciada',t_done:'Descarga completa',t_prog:'Descargando...',t_ref:'Actualizando...',t_ref2:'Cargando últimas versiones',t_upd:'Actualizado',t_upd2:'Versiones recargadas',t_cp:'¡Enlace copiado!',t_cp2:'Enlace en portapapeles',empty:s=>`No se encontraron archivos ${s}.`,empty_h:s=>`Asegúrate de que los .rbxm contienen "${s}".`,se:'Ningún archivo coincide.',e404:'Repositorio no encontrado.',e403:'Límite de API alcanzado.',egn:'Error: ',footer:'Cargado desde GitHub Releases',dfooter:'Actualizado desde GitHub Releases'},
-};
-let lang=(function(){
-  const saved=localStorage.getItem('cc_lang');if(saved&&T[saved])return saved;
-  const bl=navigator.languages||[navigator.language||'en'];
-  for(const l of bl){const short=l.split('-')[0].toLowerCase();if(T[short])return short;}
-  return 'en';
-})();
-function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...a):(v||k)}
-Object.assign(T.en,{t_saved:'Saved releases',t_saved2:'Recently checked — no extra GitHub request',t_cached:'Showing saved downloads',t_cached2:'GitHub is unavailable. Saved releases remain available.',t_fail:'Could not refresh',t_retry:time=>`Next GitHub check possible after ${time}.`});
-Object.assign(T.de,{t_saved:'Gespeicherte Releases',t_saved2:'Kürzlich geprüft — keine weitere GitHub-Anfrage',t_cached:'Gespeicherte Downloads',t_cached2:'GitHub ist nicht erreichbar. Gespeicherte Releases bleiben verfügbar.',t_fail:'Aktualisierung fehlgeschlagen',t_retry:time=>`Nächste GitHub-Abfrage ab ${time} möglich.`});
-Object.assign(T.es,{t_saved:'Versiones guardadas',t_saved2:'Revisado recientemente — sin otra consulta a GitHub',t_cached:'Descargas guardadas',t_cached2:'GitHub no está disponible. Las versiones guardadas siguen disponibles.',t_fail:'No se pudo actualizar',t_retry:time=>`Próxima consulta a GitHub después de ${time}.`});
+/* Translated UI strings and language selection live in i18n.js. */
 </script>
 
 <!-- ═══════════════ AUTH WALL ═══════════════ -->
 <div id="auth-wall" style="display:none">
   <div class="auth-box">
     <div class="auth-tabs">
-      <button class="auth-tab active" data-tab="login" onclick="switchTab('login')">🔑 Login</button>
-      <button class="auth-tab" data-tab="reg" onclick="switchTab('reg')">📝 Register</button>
+      <button class="auth-tab active" data-tab="login" onclick="switchTab('login')">🔑 <span data-t="login_btn">Login</span></button>
+      <button class="auth-tab" data-tab="reg" onclick="switchTab('reg')">📝 <span data-t="login_register">Register</span></button>
     </div>
     <div class="auth-body">
       <div class="auth-logo">
@@ -1551,28 +1537,28 @@ Object.assign(T.es,{t_saved:'Versiones guardadas',t_saved2:'Revisado recientemen
         <div class="auth-form">
           <div class="auth-err" id="login-err"></div>
           <div class="auth-field">
-            <label class="auth-label">Username</label>
+            <label class="auth-label" data-t="login_username">Username</label>
             <input class="auth-input" id="login-name" type="text" placeholder="your_username" autocomplete="username"
               onkeydown="if(event.key==='Enter')doLogin()">
           </div>
           <div class="auth-field">
-            <label class="auth-label">Password</label>
+            <label class="auth-label" data-t="login_password">Password</label>
             <input class="auth-input" id="login-pw" type="password" placeholder="••••••••" autocomplete="current-password"
               onkeydown="if(event.key==='Enter')doLogin()">
           </div>
-          <button class="auth-btn auth-btn-primary" id="login-btn" onclick="doLogin()">Login →</button>
+          <button class="auth-btn auth-btn-primary" id="login-btn" data-t="login_btn" onclick="doLogin()">Login</button>
           <a href="forgot-password.html" style="display:block;text-align:center;font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.75rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--conch)'" onmouseout="this.style.color='var(--muted)'">Forgot password?</a>
         </div>
       </div>
 
       <!-- REGISTER FORM -->
       <div id="form-reg" style="display:none">
-        <button type="button" class="cc-theme-trigger" onclick="CC_THEME.openPicker(this)">🎨 Choose theme</button>
+        <button type="button" class="cc-theme-trigger" onclick="CC_THEME.openPicker(this)">🎨 <span data-t="choose_theme">Choose theme</span></button>
         <div class="auth-form">
           <div class="auth-err" id="reg-err"></div>
           <div class="auth-ok" id="reg-ok"></div>
           <div class="auth-field">
-            <label class="auth-label">Username</label>
+            <label class="auth-label" data-t="login_username">Username</label>
             <input class="auth-input" id="reg-name" type="text" placeholder="choose_a_name" autocomplete="username" maxlength="20"
               onkeydown="if(event.key==='Enter')doRegister()">
             <div class="name-type-row">
@@ -1582,7 +1568,7 @@ Object.assign(T.es,{t_saved:'Versiones guardadas',t_saved2:'Revisado recientemen
           </div>
 
           <div class="auth-field">
-            <label class="auth-label">Password</label>
+            <label class="auth-label" data-t="login_password">Password</label>
             <input class="auth-input" id="reg-pw" type="password" placeholder="min. 6 characters" autocomplete="new-password"
               oninput="checkRegPwStrength()" onkeydown="if(event.key==='Enter')doRegister()">
             <div class="pw-strength-wrap">
@@ -1595,7 +1581,7 @@ Object.assign(T.es,{t_saved:'Versiones guardadas',t_saved2:'Revisado recientemen
             <input class="auth-input" id="reg-pw2" type="password" placeholder="repeat password" autocomplete="new-password"
               onkeydown="if(event.key==='Enter')doRegister()">
           </div>
-          <button class="auth-btn auth-btn-primary" id="reg-btn" onclick="doRegister()">Create Account →</button>
+          <button class="auth-btn auth-btn-primary" id="reg-btn" data-t="register_btn" onclick="doRegister()">Create Account</button>
           <div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);text-align:center;margin-top:.25rem;line-height:1.5">
             One account per IP. Duplicate accounts are automatically blocked.
           </div>
@@ -1664,14 +1650,14 @@ Object.assign(T.es,{t_saved:'Versiones guardadas',t_saved2:'Revisado recientemen
     </div>
     <!-- NOTIFICATION BELL -->
     <div class="notif-bell-wrap" id="notif-bell-wrap">
-      <button class="notif-bell" id="notif-bell" onclick="toggleNotifDropdown()" title="Notifications" aria-label="Notifications" aria-controls="notif-dropdown" aria-expanded="false">
+      <button class="notif-bell" id="notif-bell" onclick="toggleNotifDropdown()" title="Notifications" data-t-title="notifications" aria-label="Notifications" data-t-aria-label="notifications" aria-controls="notif-dropdown" aria-expanded="false">
         🔔
         <span class="notif-badge" id="notif-badge" style="display:none">0</span>
       </button>
       <div class="notif-dropdown" id="notif-dropdown" popover="auto" role="region" aria-labelledby="notif-heading" tabindex="-1">
         <div class="notif-header">
-          <span class="notif-header-title" id="notif-heading">🔔 Notifications</span>
-          <button class="notif-mark-read" onclick="markAllRead()">Mark all read</button>
+          <span class="notif-header-title" id="notif-heading">🔔 <span data-t="notifications">Notifications</span></span>
+          <button class="notif-mark-read" onclick="markAllRead()" data-t="mark_all_read">Mark all read</button>
         </div>
         <div class="notif-list" id="notif-list">
           <div class="notif-empty">No notifications yet.</div>
@@ -1691,13 +1677,11 @@ Object.assign(T.es,{t_saved:'Versiones guardadas',t_saved2:'Revisado recientemen
       <span class="user-badge-name" id="user-badge-name"></span>
       <button class="user-badge-logout" onclick="logout()" title="Logout">✕</button>
     </div>
-    <select class="lang-select" id="lang-sel" onchange="setLang(this.value)">
-      <option value="en">EN</option><option value="de">DE</option><option value="es">ES</option>
-    </select>
-    <button class="icon-btn" id="refresh-btn" onclick="doRefresh()" title="Refresh">
+    <select class="lang-select" id="lang-sel" data-language-select="compact" onchange="setLang(this.value)" aria-label="Display language"></select>
+    <button class="icon-btn" id="refresh-btn" onclick="doRefresh()" title="Refresh" data-t-title="refresh">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
-    <button class="burger" id="burger-btn" onclick="toggleDrawer()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <button class="burger" id="burger-btn" onclick="toggleDrawer()" aria-label="Menu" data-t-aria-label="menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -1981,15 +1965,16 @@ async function subscribeEmail(){
   }catch{toast({title:'Subscription failed',sub:'Please try again later',type:'w',dur:3000});}
 }
 
-function setLang(l){lang=l;localStorage.setItem('cc_lang',l);applyLang();rerender()}
+function setLang(code){CC_I18N.setLanguage(code)}
 function applyLang(){
+  CC_I18N.apply();
   const ids={['dl-dl']:'nav_dl',['dl-ann']:'nav_ann',['hero-sub']:'hero_sub',['sb-c']:'bdl',['sb-r']:'bdl',['desc-c']:'desc_c',['desc-r']:'desc_r',['empty-conch']:'se',['empty-cmdr']:'se'};
   Object.entries(ids).forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.textContent=t(k)});
   document.getElementById('search-conch').placeholder=t('srch_c');
   document.getElementById('search-cmdr').placeholder=t('srch_r');
   document.getElementById('footer').textContent='Conch & Cmdr — '+t('footer');
   document.getElementById('dl-footer').textContent=t('dfooter');
-  document.getElementById('lang-sel').value=lang;
+  document.getElementById('lang-sel').value=CC_I18N.language;
 }
 
 function getDLC(f){try{return parseInt(localStorage.getItem('dlc_'+f)||'0')}catch{return 0}}
@@ -2240,7 +2225,7 @@ function timeAgoShort(s){
   if(diff<3600)return Math.floor(diff/60)+'m';
   if(diff<86400)return Math.floor(diff/3600)+'h';
   if(diff<604800)return Math.floor(diff/86400)+'d';
-  return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  return new Date(s).toLocaleDateString(CC_I18N.language,{month:'short',day:'numeric'});
 }
 
 async function postComment(elId,fileKey){
@@ -2284,7 +2269,11 @@ async function deleteComment(commentId,elId,fileKey){
 
 function releaseErrorMessage(error){
   const message=error.rateLimited?t('e403'):error.status===404?t('e404'):t('egn')+error.message;
-  return message+(error.retryAt?' '+t('t_retry',new Date(error.retryAt).toLocaleString(lang,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})):'');
+  return message+(error.retryAt?' '+t('t_retry',new Date(error.retryAt).toLocaleString(CC_I18N.language,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})):'');
+}
+function renderReleaseError(error){
+  document.getElementById('release-status').hidden=true;
+  ['conch-list','cmdr-list','conch-beta-list','cmdr-beta-list','sentinel-list'].forEach(id=>document.getElementById(id).innerHTML=`<div class="error-state">❌ ${eh(releaseErrorMessage(error))}</div>`);
 }
 function setReleaseStatus(snapshot){
   const status=document.getElementById('release-status');
@@ -2336,19 +2325,26 @@ async function fetchReleases({force=false}={}){
     }else{
       if(mobWrap)mobWrap.style.display='none';
     }
+    window._ccReleaseState=snapshot;
     setReleaseStatus(snapshot);
     if(AUTH.user)await checkNewReleases(snapshot);
     if(!snapshot.stale)checkAndNotifyRelease(releases);
     return snapshot;
   }catch(e){
-    const msg=releaseErrorMessage(e);
-    document.getElementById('release-status').hidden=true;
-    ['conch-list','cmdr-list','conch-beta-list','cmdr-beta-list','sentinel-list'].forEach(id=>document.getElementById(id).innerHTML=`<div class="error-state">❌ ${eh(msg)}</div>`);
+    window._ccReleaseState={error:e};renderReleaseError(e);
     if(window.CCErrors&&!e.rateLimited)CCErrors.report('file list');
     return {error:e};
   }
 }
-function rerender(){if(_cc.length||_cr.length){render('conch',_cc,'c');render('cmdr',_cr,'r');renderBeta('conch-beta',_ccb,'c');renderBeta('cmdr-beta',_crb,'r');}}
+function rerender(){
+  if(!window._ccReleaseState)return;
+  if(!window._ccReleaseState.releases){renderReleaseError(window._ccReleaseState.error);return;}
+  render('conch',_cc,'c');render('cmdr',_cr,'r');render('sentinel',_sen,'s');
+  renderBeta('conch-beta',_ccb,'c');renderBeta('cmdr-beta',_crb,'r');
+  renderBeta('cmdr-mobile',Object.values(window._mob||{}),'r');
+  setReleaseStatus(window._ccReleaseState);
+  ['conch','cmdr','sentinel'].forEach(doSearch);
+}
 
 function render(sec,groups,cls){
   const list=document.getElementById(sec+'-list');
@@ -3737,7 +3733,7 @@ async function checkFriendRequestNotifs(){
     if(!Array.isArray(rows))return;
 
     const freqNotifs=rows.map(req=>({
-      id:'freq-'+req.id,
+      id:'freq-'+req.id,fromUsername:req.from_username,
       icon:'👤',
       title:`${req.from_username} sent you a friend request`,
       desc:'Go to Messages to accept or decline.',
@@ -3798,7 +3794,7 @@ async function checkNewReleases(snapshot){
       const lo=(assets[0]?.name||'').toLowerCase();
       const type=lo.includes('conch')?'🧩 Conch':lo.includes('cmdr')?'⚔️ Cmdr':'📦';
       return{
-        id:rel.id,source:'release',
+        id:rel.id,source:'release',releaseType:type,releaseTag:rel.tag_name||rel.name,assetCount:assets.length,
         icon:lo.includes('conch')?'🧩':lo.includes('cmdr')?'⚔️':'📦',
         title:`New ${type} Release — ${rel.tag_name||rel.name}`,
         desc:assets.length?`${assets.length} file${assets.length>1?'s':''} available`:'New release available',
@@ -3815,7 +3811,7 @@ async function checkNewReleases(snapshot){
 function renderNotifs(){
   const list=document.getElementById('notif-list');
   if(!_notifs.length){
-    list.innerHTML='<div class="notif-empty">No notifications.</div>';
+    list.innerHTML=`<div class="notif-empty">${eh(t('no_notifications'))}</div>`;
     return;
   }
   list.innerHTML=_notifs.map(n=>`
@@ -3823,8 +3819,8 @@ function renderNotifs(){
       ${n.unread?'<div class="notif-item-dot"></div>':''}
       <div class="notif-item-icon">${n.icon}</div>
       <div class="notif-item-body">
-        <div class="notif-item-title">${eh(n.title)}</div>
-        <div class="notif-item-desc">${eh(n.desc)}</div>
+        <div class="notif-item-title">${eh(n.source==='freq'?t('friend_request',n.fromUsername):n.source==='release'?t('new_release',n.releaseType,n.releaseTag):n.title)}</div>
+        <div class="notif-item-desc">${eh(n.source==='freq'?t('friend_request_desc'):n.source==='release'?t('files_available',n.assetCount):n.desc)}</div>
         <div class="notif-item-time">${timeAgoShort(n.time)}</div>
       </div>
     </div>`).join('');
@@ -4133,7 +4129,8 @@ function endIntro(){
 /* ══════════════════════════════════════
    INIT
 ══════════════════════════════════════ */
-document.getElementById('lang-sel').value=lang;
+window.addEventListener('cc:language-change',()=>{applyLang();rerender();renderNotifs();positionNotifDropdown();});
+document.getElementById('lang-sel').value=CC_I18N.language;
 loadTheme();
 applyLang();
 showSkel('conch-list');
