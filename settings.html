@@ -125,7 +125,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
         <div class="setting-desc">Switch between dark and light theme</div>
       </div>
       <label class="toggle-wrap">
-        <input type="checkbox" class="toggle-input" id="s-darkmode" onchange="save('cc_theme',this.checked?'dark':'light');applyTheme()">
+        <input type="checkbox" class="toggle-input" id="s-darkmode" aria-label="Dark Mode" onchange="save('cc_system_theme','0');document.getElementById('s-systemtheme').checked=false;save('cc_theme',this.checked?'dark':'light');applyTheme()">
         <span class="toggle-slider"></span>
       </label>
     </div>
@@ -139,6 +139,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
         <input type="checkbox" class="toggle-input" id="s-systemtheme" onchange="save('cc_system_theme',this.checked?'1':'0');applyTheme()">
         <span class="toggle-slider"></span>
       </label>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-left">
+        <div class="setting-label">Liquid Glass</div>
+        <div class="setting-desc">Translucent panels, soft reflections and depth. Off by default; your choice is saved in this browser.</div>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" class="toggle-input" id="s-liquid-glass" aria-label="Liquid Glass" onchange="save('cc_liquid_glass',this.checked?'1':'0');applyTheme()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div class="setting-left">
+        <div class="setting-label">Theme Preview</div>
+        <div class="setting-desc">Preview Classic or Liquid Glass with any accent color</div>
+      </div>
+      <button type="button" class="connected-save-btn" onclick="CC_THEME.openPicker(this)">Choose theme</button>
     </div>
 
     <div class="setting-row">
@@ -200,16 +218,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       </div>
       <label class="toggle-wrap">
         <input type="checkbox" class="toggle-input" id="s-release-notif" onchange="save('cc_notif_releases',this.checked?'1':'0')">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-    <div class="setting-row">
-      <div class="setting-left">
-        <div class="setting-label">Live Release Banner</div>
-        <div class="setting-desc">Show banner at top of page when new release appears while you're online</div>
-      </div>
-      <label class="toggle-wrap">
-        <input type="checkbox" class="toggle-input" id="s-live-banner" onchange="save('cc_live_banner',this.checked?'1':'0')">
         <span class="toggle-slider"></span>
       </label>
     </div>
@@ -477,11 +485,11 @@ const ACCENT_COLORS=[
 /* ── DEFAULTS ── */
 const DEFAULTS={
   cc_theme:'dark',
+  cc_liquid_glass:'0',
   cc_system_theme:'0',
   cc_lang:'en',
   cc_compact_view:'0',
   cc_notif_releases:'1',
-  cc_live_banner:'1',
   cc_notif_admin:'1',
   cc_confetti:'1',
   cc_show_beta:'1',
@@ -515,16 +523,11 @@ function showSaveToast(){
 
 /* ── APPLY THEME ── */
 function applyTheme(){
-  const useSystem=get('cc_system_theme')==='1';
-  const root=document.documentElement;
-  if(useSystem){
-    root.classList.toggle('light-mode',window.matchMedia('(prefers-color-scheme:light)').matches);
-  }else{
-    root.classList.toggle('light-mode',get('cc_theme')==='light');
-  }
+  window.CC_THEME.apply();
 }
 
 function applyAnimations(){
+  window.CC_THEME.apply();
   const on=get('cc_animations')==='1';
   document.documentElement.style.setProperty('--transition-speed',on?'.3s':'0s');
   if(!on){
@@ -625,6 +628,7 @@ function loadSettings(){
   applyTheme();
   document.getElementById('s-darkmode').checked=get('cc_theme')==='dark';
   document.getElementById('s-systemtheme').checked=get('cc_system_theme')==='1';
+  document.getElementById('s-liquid-glass').checked=get('cc_liquid_glass')==='1';
 
   /* Language */
   document.getElementById('s-lang').value=get('cc_lang');
@@ -633,7 +637,6 @@ function loadSettings(){
   const toggleMap={
     's-compact':'cc_compact_view',
     's-release-notif':'cc_notif_releases',
-    's-live-banner':'cc_live_banner',
     's-admin-notif':'cc_notif_admin',
     's-confetti':'cc_confetti',
     's-show-beta':'cc_show_beta',
@@ -659,21 +662,22 @@ function loadSettings(){
   const grid=document.getElementById('color-grid');
   const currentAccent=get('cc_accent');
   grid.innerHTML=ACCENT_COLORS.map(c=>`
-    <div class="color-dot${c.value===currentAccent?' active':''}"
+    <button type="button" class="color-dot${c.value===currentAccent?' active':''}"
       style="background:${c.value}"
-      title="${c.name}"
+      title="${c.name}" aria-label="${c.name} accent" aria-pressed="${c.value===currentAccent}"
       onclick="setAccent('${c.value}',this)">
-    </div>`).join('');
+    </button>`).join('');
 
   applyAnimations();
 }
 
 function setAccent(value,dot){
-  document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));
+  document.querySelectorAll('.color-dot').forEach(d=>{d.classList.remove('active');d.setAttribute('aria-pressed','false')});
   dot.classList.add('active');
+  dot.setAttribute('aria-pressed','true');
   save('cc_accent',value);
   /* Apply accent live */
-  document.documentElement.style.setProperty('--conch',value);
+  window.CC_THEME.apply();
 }
 
 /* ── RESET ── */
@@ -757,6 +761,16 @@ async function confirmDeleteAccount(){
 /* ── INIT ── */
 loadSettings();
 
+window.addEventListener('cc:theme-change',()=>{
+  document.getElementById('s-liquid-glass').checked=CC_THEME.state().glass;
+  document.getElementById('s-darkmode').checked=CC_THEME.state().mode==='dark';
+  document.getElementById('s-systemtheme').checked=CC_THEME.state().system;
+  document.querySelectorAll('.color-dot').forEach(dot=>{
+    const active=dot.style.backgroundColor===CC_THEME.colorCSS(CC_THEME.state().accent);
+    dot.classList.toggle('active',active);dot.setAttribute('aria-pressed',String(active));
+  });
+});
+
 /* System theme change listener */
 window.matchMedia('(prefers-color-scheme:light)').addEventListener('change',()=>{
   if(get('cc_system_theme')==='1')applyTheme();
@@ -765,3 +779,4 @@ window.matchMedia('(prefers-color-scheme:light)').addEventListener('change',()=>
 <script src="cursor-trail.js"></script>
 </body>
 </html>
+

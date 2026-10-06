@@ -612,23 +612,26 @@
   @keyframes notif-shake{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-15deg)}40%,80%{transform:rotate(15deg)}}
 
   /* NOTIF DROPDOWN */
-  .notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:300px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.5);z-index:500;overflow:hidden;animation:dropIn .2s ease}
+  .notif-dropdown{display:none;position:fixed;inset:auto;margin:0;padding:0;width:340px;max-width:calc(100vw - 24px);background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.5);z-index:500;overflow:hidden;animation:dropIn .2s ease}
+  .notif-dropdown:popover-open{display:flex;flex-direction:column}
+  .notif-dropdown.is-open{display:flex;flex-direction:column}
   @keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
   .notif-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border)}
   .notif-header-title{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text)}
   .notif-mark-read{font-family:var(--mono);font-size:.65rem;color:var(--muted);background:none;border:none;cursor:pointer;transition:color .2s}
   .notif-mark-read:hover{color:var(--conch)}
-  .notif-list{max-height:320px;overflow-y:auto}
+  .notif-list{min-height:0;max-height:320px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
   .notif-item{padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;gap:.75rem;align-items:flex-start;transition:background .15s;cursor:default}
   .notif-item:last-child{border-bottom:none}
   .notif-item.unread{background:rgba(15,244,198,.03)}
   .notif-item-icon{font-size:1.1rem;flex-shrink:0;margin-top:.1rem}
   .notif-item-body{flex:1;min-width:0}
-  .notif-item-title{font-family:var(--mono);font-size:.75rem;font-weight:600;color:var(--text);margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .notif-item-desc{font-family:var(--mono);font-size:.67rem;color:var(--muted);line-height:1.5}
+  .notif-item-title{font-family:var(--mono);font-size:.75rem;font-weight:600;color:var(--text);margin-bottom:.2rem;overflow-wrap:anywhere}
+  .notif-item-desc{font-family:var(--mono);font-size:.72rem;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
   .notif-item-time{font-family:var(--mono);font-size:.6rem;color:var(--muted);opacity:.6;margin-top:.2rem}
   .notif-item-dot{width:6px;height:6px;border-radius:50%;background:var(--conch);flex-shrink:0;margin-top:.35rem}
   .notif-empty{text-align:center;padding:2rem 1rem;font-family:var(--mono);font-size:.75rem;color:var(--muted);opacity:.6}
+  .release-status{max-width:900px;margin:1rem auto;padding:.8rem 1rem;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:.75rem;line-height:1.6}
 
   /* ── ANIMATED AVATAR RINGS ── */
   .nav-avatar.ring-admin{border:none;position:relative;box-shadow:none}
@@ -1335,6 +1338,8 @@ async function doLogin(){
     /* Success */
     AUTH.user={username:user.display_name||user.username,rawUsername:user.username.toLowerCase(),id:user.id,isAdmin:user.username.toLowerCase()==='max',role:user.role||'user',isBetaTester:user.role==='beta'||user.role==='admin',isCoCreator:user.role==='cocreator',isPartner:user.role==='partner'};
     try{localStorage.setItem('cc_auth',JSON.stringify(AUTH.user));}catch{}
+    // Questions uses a server-verified session; existing website login stays independent.
+    void window.CC_QUESTIONS.login(user.username,pw).catch(()=>{});
     hideAuthWall();
     updateNavUser();
     if(AUTH.user.isAdmin){
@@ -1404,7 +1409,10 @@ function showBanWall(ip,reason){
 }
 
 function logout(){
+  window.CC_QUESTIONS.logout();
   AUTH.user=null;AUTH.bypassed=false;
+  closeNotifDropdown();_notifs=[];renderNotifs();updateBadge();
+  document.getElementById('notif-bell-wrap').classList.remove('vis');
   try{localStorage.removeItem('cc_auth');}catch{}
   document.getElementById('user-badge').classList.remove('vis');
   document.getElementById('auth-wall').style.display='flex';
@@ -1520,6 +1528,9 @@ let lang=(function(){
   return 'en';
 })();
 function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...a):(v||k)}
+Object.assign(T.en,{t_saved:'Saved releases',t_saved2:'Recently checked — no extra GitHub request',t_cached:'Showing saved downloads',t_cached2:'GitHub is unavailable. Saved releases remain available.',t_fail:'Could not refresh',t_retry:time=>`Next GitHub check possible after ${time}.`});
+Object.assign(T.de,{t_saved:'Gespeicherte Releases',t_saved2:'Kürzlich geprüft — keine weitere GitHub-Anfrage',t_cached:'Gespeicherte Downloads',t_cached2:'GitHub ist nicht erreichbar. Gespeicherte Releases bleiben verfügbar.',t_fail:'Aktualisierung fehlgeschlagen',t_retry:time=>`Nächste GitHub-Abfrage ab ${time} möglich.`});
+Object.assign(T.es,{t_saved:'Versiones guardadas',t_saved2:'Revisado recientemente — sin otra consulta a GitHub',t_cached:'Descargas guardadas',t_cached2:'GitHub no está disponible. Las versiones guardadas siguen disponibles.',t_fail:'No se pudo actualizar',t_retry:time=>`Próxima consulta a GitHub después de ${time}.`});
 </script>
 
 <!-- ═══════════════ AUTH WALL ═══════════════ -->
@@ -1556,6 +1567,7 @@ function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...
 
       <!-- REGISTER FORM -->
       <div id="form-reg" style="display:none">
+        <button type="button" class="cc-theme-trigger" onclick="CC_THEME.openPicker(this)">🎨 Choose theme</button>
         <div class="auth-form">
           <div class="auth-err" id="reg-err"></div>
           <div class="auth-ok" id="reg-ok"></div>
@@ -1613,7 +1625,7 @@ function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...
 <div id="toast-container"></div>
 
 <!-- LIVE RELEASE BANNER -->
-<div id="live-release-banner">
+<div id="live-release-banner" hidden>
   <div class="lrb-inner">
     <div class="lrb-dot"></div>
     <div class="lrb-text" id="lrb-text">🆕 <strong>New release available!</strong></div>
@@ -1652,13 +1664,13 @@ function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...
     </div>
     <!-- NOTIFICATION BELL -->
     <div class="notif-bell-wrap" id="notif-bell-wrap">
-      <button class="notif-bell" id="notif-bell" onclick="toggleNotifDropdown()" title="Notifications">
+      <button class="notif-bell" id="notif-bell" onclick="toggleNotifDropdown()" title="Notifications" aria-label="Notifications" aria-controls="notif-dropdown" aria-expanded="false">
         🔔
         <span class="notif-badge" id="notif-badge" style="display:none">0</span>
       </button>
-      <div class="notif-dropdown" id="notif-dropdown" style="display:none">
+      <div class="notif-dropdown" id="notif-dropdown" popover="auto" role="region" aria-labelledby="notif-heading" tabindex="-1">
         <div class="notif-header">
-          <span class="notif-header-title">🔔 Notifications</span>
+          <span class="notif-header-title" id="notif-heading">🔔 Notifications</span>
           <button class="notif-mark-read" onclick="markAllRead()">Mark all read</button>
         </div>
         <div class="notif-list" id="notif-list">
@@ -1682,9 +1694,6 @@ function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...
     <select class="lang-select" id="lang-sel" onchange="setLang(this.value)">
       <option value="en">EN</option><option value="de">DE</option><option value="es">ES</option>
     </select>
-    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">
-      <span class="theme-icon" id="theme-icon">🌙</span>
-    </button>
     <button class="icon-btn" id="refresh-btn" onclick="doRefresh()" title="Refresh">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
@@ -1713,6 +1722,7 @@ function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...
     <a class="drawer-item" onclick="openEmailModal();closeDrawer()"><span class="drawer-icon">📧</span><span>Email Notifications</span></a>
     <a class="drawer-item" href="changelog.html" onclick="closeDrawer()"><span class="drawer-icon">📋</span><span>Changelog</span></a>
     <a class="drawer-item" href="settings.html" onclick="closeDrawer()"><span class="drawer-icon">⚙️</span><span>Settings</span></a>
+    <a class="drawer-item" id="drawer-questions-link" href="questions.html" onclick="closeDrawer()"><span class="drawer-icon">💬</span><span>Questions</span></a>
     <a class="drawer-item" href="messages.html" onclick="closeDrawer()"><span class="drawer-icon">💬</span><span>Messages</span></a>
     <a class="drawer-item" onclick="openFavModal();closeDrawer()"><span class="drawer-icon">⭐</span><span>My Favorites</span></a>
     <a class="drawer-item" href="bugreport.html" onclick="closeDrawer()"><span class="drawer-icon">🐛</span><span>Report a Bug</span></a>
@@ -1785,6 +1795,7 @@ function t(k,...a){const v=(T[lang]||T.en)[k];return typeof v==='function'?v(...
 </div>
 
 <!-- CONCH -->
+<div class="release-status" id="release-status" role="status" hidden></div>
 <div class="section" id="conch">
   <div class="section-header"><h2 class="c">Conch</h2><span class="sbadge sbadge-c" id="sb-c"></span></div>
   <div class="countdown-wrap" id="countdown-conch-wrap" style="display:none;margin-bottom:2rem">
@@ -1938,15 +1949,8 @@ function copyInviteLink(){
 
 function closeDrawer(){_dopen=false;['drawer','drawer-overlay','burger-btn'].forEach(id=>document.getElementById(id).classList.remove('open'));document.body.style.overflow=''}
 
-function toggleTheme(){
-  const root=document.documentElement,icon=document.getElementById('theme-icon'),isDark=!root.classList.contains('light-mode');
-  if(isDark){root.classList.add('light-mode');icon.textContent='☀️';localStorage.setItem('cc_theme','light');}
-  else{root.classList.remove('light-mode');icon.textContent='🌙';localStorage.setItem('cc_theme','dark');}
-}
 function loadTheme(){
-  const saved=localStorage.getItem('cc_theme'),icon=document.getElementById('theme-icon');
-  if(saved==='light'){document.documentElement.classList.add('light-mode');if(icon)icon.textContent='☀️';}
-  else{if(icon)icon.textContent='🌙';}
+  window.CC_THEME.apply();
 }
 
 function openEmailModal(){document.getElementById('email-modal-overlay').classList.add('open');document.body.style.overflow='hidden';}
@@ -2278,13 +2282,21 @@ async function deleteComment(commentId,elId,fileKey){
   }
 }
 
-async function fetchReleases(){
+function releaseErrorMessage(error){
+  const message=error.rateLimited?t('e403'):error.status===404?t('e404'):t('egn')+error.message;
+  return message+(error.retryAt?' '+t('t_retry',new Date(error.retryAt).toLocaleString(lang,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})):'');
+}
+function setReleaseStatus(snapshot){
+  const status=document.getElementById('release-status');
+  status.hidden=!snapshot.stale;
+  status.textContent=snapshot.stale?t('t_cached2')+' '+releaseErrorMessage(snapshot.error):'';
+}
+async function fetchReleases({force=false}={}){
   showSkel('conch-list');showSkel('cmdr-list');showSkel('conch-beta-list');showSkel('cmdr-beta-list');showSkel('sentinel-list');
   try{
-    const cacheBuster='&_cb='+Date.now();
-    const res=await fetch(`https://api.github.com/repos/${CONFIG.GITHUB_REPO}/releases?per_page=${CONFIG.MAX_RELEASES}${cacheBuster}`);
-    if(!res.ok)throw new Error(res.status===404?'404':res.status===403?'403':res.status+' '+res.statusText);
-    const releases=await res.json();
+    const snapshot=await CC_GITHUB.releases({repo:CONFIG.GITHUB_REPO,perPage:CONFIG.MAX_RELEASES,force});
+    const releases=snapshot.releases;
+    window._mob={};
     const cm={},rm={},cbm={},rbm={},sm={};
     releases.forEach(rel=>{
       const date=new Date(rel.published_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
@@ -2324,11 +2336,16 @@ async function fetchReleases(){
     }else{
       if(mobWrap)mobWrap.style.display='none';
     }
-    checkAndNotifyRelease(releases);
+    setReleaseStatus(snapshot);
+    if(AUTH.user)await checkNewReleases(snapshot);
+    if(!snapshot.stale)checkAndNotifyRelease(releases);
+    return snapshot;
   }catch(e){
-    const msg=e.message==='404'?t('e404'):e.message==='403'?t('e403'):t('egn')+e.message;
-    ['conch-list','cmdr-list'].forEach(id=>document.getElementById(id).innerHTML=`<div class="error-state">❌ ${msg}</div>`);
-    if(window.CCErrors)CCErrors.report('file list');
+    const msg=releaseErrorMessage(e);
+    document.getElementById('release-status').hidden=true;
+    ['conch-list','cmdr-list','conch-beta-list','cmdr-beta-list','sentinel-list'].forEach(id=>document.getElementById(id).innerHTML=`<div class="error-state">❌ ${eh(msg)}</div>`);
+    if(window.CCErrors&&!e.rateLimited)CCErrors.report('file list');
+    return {error:e};
   }
 }
 function rerender(){if(_cc.length||_cr.length){render('conch',_cc,'c');render('cmdr',_cr,'r');renderBeta('conch-beta',_ccb,'c');renderBeta('cmdr-beta',_crb,'r');}}
@@ -2454,9 +2471,12 @@ async function doRefresh(){
   ['empty-conch','empty-cmdr','empty-sentinel'].forEach(id=>document.getElementById(id).classList.remove('vis'));
   clearSearch('conch');clearSearch('cmdr');clearSearch('sentinel');
   toast({title:t('t_ref'),sub:t('t_ref2'),type:'c',dur:2000});
-  await fetchReleases();
-  btn.disabled=false;btn.classList.remove('spinning');
-  toast({title:t('t_upd'),sub:t('t_upd2'),type:'ok',dur:2500});
+  try{
+    const result=await fetchReleases({force:true});
+    if(result.stale)toast({title:t('t_cached'),sub:releaseErrorMessage(result.error),type:'w',dur:4500});
+    else if(result.error)toast({title:t('t_fail'),sub:releaseErrorMessage(result.error),type:'w',dur:4500});
+    else toast({title:t(result.fromCache?'t_saved':'t_upd'),sub:t(result.fromCache?'t_saved2':'t_upd2'),type:'ok',dur:2500});
+  }finally{btn.disabled=false;btn.classList.remove('spinning');}
 }
 
 function fmtB(b){if(!b)return'0 B';const k=1024,s=['B','KB','MB','GB'],i=Math.floor(Math.log(b)/Math.log(k));return parseFloat((b/Math.pow(k,i)).toFixed(2))+' '+s[i]}
@@ -3689,22 +3709,32 @@ async function checkOneYearBadge(){
 ══════════════════════════════════════════════════════ */
 let _notifOpen=false;
 let _notifs=[];
+let _notifUser=null;
+
+function mergeNotifications(source,items,userId){
+  if(!AUTH.user||AUTH.user.id!==userId)return;
+  if(_notifUser!==userId){_notifs=[];_notifUser=userId;}
+  _notifs=[..._notifs.filter(n=>n.source!==source),...items].sort((a,b)=>new Date(b.time)-new Date(a.time));
+  renderNotifs();updateBadge();
+}
 
 async function initNotifications(){
   if(!AUTH.user)return;
+  if(_notifUser!==AUTH.user.id){_notifs=[];_notifUser=AUTH.user.id;renderNotifs();updateBadge();}
   document.getElementById('notif-bell-wrap').classList.add('vis');
   await Promise.all([checkNewReleases(),checkAdminMessages(),checkFriendRequestNotifs()]);
 }
 
 async function checkFriendRequestNotifs(){
+  const userId=AUTH.user?.id;if(!userId)return;
   try{
-    const seenKey='cc_seen_freqs_'+(AUTH.user.id||'anon');
+    const seenKey='cc_seen_freqs_'+userId;
     const seen=JSON.parse(localStorage.getItem(seenKey)||'[]');
 
-    const r=await sbFetch(`/rest/v1/cc_friend_requests?to_user_id=eq.${AUTH.user.id}&status=eq.pending&select=*&order=created_at.desc&limit=10`);
+    const r=await sbFetch(`/rest/v1/cc_friend_requests?to_user_id=eq.${userId}&status=eq.pending&select=*&order=created_at.desc&limit=10`);
     if(!r.ok)return;
     const rows=await r.json();
-    if(!rows||!rows.length)return;
+    if(!Array.isArray(rows))return;
 
     const freqNotifs=rows.map(req=>({
       id:'freq-'+req.id,
@@ -3717,22 +3747,21 @@ async function checkFriendRequestNotifs(){
       source:'freq'
     }));
 
-    _notifs=[..._notifs,...freqNotifs].sort((a,b)=>new Date(b.time)-new Date(a.time));
-    renderNotifs();
-    updateBadge();
+    mergeNotifications('freq',freqNotifs,userId);
   }catch{}
 }
 
 async function checkAdminMessages(){
+  const userId=AUTH.user?.id;if(!userId)return;
   try{
-    const seenKey='cc_seen_msgs_'+(AUTH.user.id||'anon');
+    const seenKey='cc_seen_msgs_'+userId;
     const seen=JSON.parse(localStorage.getItem(seenKey)||'[]');
 
     /* Fetch messages for this user or all users */
-    const r=await sbFetch(`/rest/v1/cc_notifications?or=(target_user_id.eq.${AUTH.user.id},target_user_id.is.null)&active=eq.true&select=*&order=created_at.desc&limit=20`);
+    const r=await sbFetch(`/rest/v1/cc_notifications?or=(target_user_id.eq.${userId},target_user_id.is.null)&active=eq.true&select=*&order=created_at.desc&limit=20`);
     if(!r.ok)return;
     const rows=await r.json();
-    if(!rows||!rows.length)return;
+    if(!Array.isArray(rows))return;
 
     const adminNotifs=rows.map(n=>({
       id:'msg-'+n.id,
@@ -3745,35 +3774,31 @@ async function checkAdminMessages(){
       source:'admin'
     }));
 
-    /* Merge with existing release notifs */
-    _notifs=[..._notifs,...adminNotifs].sort((a,b)=>new Date(b.time)-new Date(a.time));
-    renderNotifs();
-    updateBadge();
+    mergeNotifications('admin',adminNotifs,userId);
   }catch{}
 }
 
-async function checkNewReleases(){
+async function checkNewReleases(snapshot){
+  const userId=AUTH.user?.id;if(!userId)return;
   try{
     /* Load last seen release from localStorage */
-    const lastSeenKey='cc_last_seen_release_'+(AUTH.user.id||'anon');
+    const lastSeenKey='cc_last_seen_release_'+userId;
     const lastSeen=localStorage.getItem(lastSeenKey)||'';
 
-    const r=await fetch('https://api.github.com/repos/Systems-Download/Systems-Download.github.io/releases?per_page=5');
-    if(!r.ok)return;
-    const releases=await r.json();
-    if(!releases||!releases.length)return;
+    snapshot=snapshot||await CC_GITHUB.releases({repo:CONFIG.GITHUB_REPO,perPage:CONFIG.MAX_RELEASES});
+    const releases=snapshot.releases;
 
     /* Find releases newer than last seen */
     const newReleases=lastSeen
       ?releases.filter(rel=>new Date(rel.published_at)>new Date(lastSeen))
       :releases.slice(0,1); /* First time — show latest 1 */
 
-    _notifs=newReleases.map(rel=>{
+    const releaseNotifs=newReleases.map(rel=>{
       const assets=(rel.assets||[]).filter(a=>a.name.toLowerCase().endsWith('.rbxm'));
       const lo=(assets[0]?.name||'').toLowerCase();
       const type=lo.includes('conch')?'🧩 Conch':lo.includes('cmdr')?'⚔️ Cmdr':'📦';
       return{
-        id:rel.id,
+        id:rel.id,source:'release',
         icon:lo.includes('conch')?'🧩':lo.includes('cmdr')?'⚔️':'📦',
         title:`New ${type} Release — ${rel.tag_name||rel.name}`,
         desc:assets.length?`${assets.length} file${assets.length>1?'s':''} available`:'New release available',
@@ -3783,19 +3808,18 @@ async function checkNewReleases(){
       };
     });
 
-    renderNotifs();
-    updateBadge();
+    mergeNotifications('release',releaseNotifs,userId);
   }catch{}
 }
 
 function renderNotifs(){
   const list=document.getElementById('notif-list');
   if(!_notifs.length){
-    list.innerHTML='<div class="notif-empty">No new releases.</div>';
+    list.innerHTML='<div class="notif-empty">No notifications.</div>';
     return;
   }
   list.innerHTML=_notifs.map(n=>`
-    <div class="notif-item${n.unread?' unread':''}" onclick="openNotif('${n.url}')">
+    <div class="notif-item${n.unread?' unread':''}"${n.url?` role="link" tabindex="0" onclick="openNotif('${ea(n.url)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotif('${ea(n.url)}')}"`:''}>
       ${n.unread?'<div class="notif-item-dot"></div>':''}
       <div class="notif-item-icon">${n.icon}</div>
       <div class="notif-item-body">
@@ -3830,20 +3854,40 @@ function updateBadge(){
 }
 
 function toggleNotifDropdown(){
-  _notifOpen=!_notifOpen;
-  document.getElementById('notif-dropdown').style.display=_notifOpen?'block':'none';
+  if(_notifOpen){closeNotifDropdown();return;}
+  const dropdown=document.getElementById('notif-dropdown');
+  if(typeof dropdown.showPopover==='function')dropdown.showPopover();
+  else{document.body.appendChild(dropdown);dropdown.classList.add('is-open');}
+  _notifOpen=true;
+  document.getElementById('notif-bell').setAttribute('aria-expanded','true');
+  positionNotifDropdown();
+  dropdown.focus({preventScroll:true});
+}
+
+function positionNotifDropdown(){
+  if(!_notifOpen)return;
+  const dropdown=document.getElementById('notif-dropdown'),bell=document.getElementById('notif-bell').getBoundingClientRect();
+  const height=window.innerHeight,width=window.innerWidth,gap=10,edge=12;
+  const below=height-bell.bottom-gap-edge,above=bell.top-gap-edge;
+  const placeAbove=below<200&&above>below;
+  dropdown.style.maxHeight=Math.max(100,placeAbove?above:below)+'px';
+  dropdown.style.left=Math.max(edge,Math.min(bell.right-dropdown.offsetWidth,width-dropdown.offsetWidth-edge))+'px';
+  dropdown.style.top=Math.max(edge,placeAbove?bell.top-gap-dropdown.offsetHeight:bell.bottom+gap)+'px';
 }
 
 function closeNotifDropdown(){
+  const dropdown=document.getElementById('notif-dropdown');
   _notifOpen=false;
-  document.getElementById('notif-dropdown').style.display='none';
+  if(typeof dropdown.hidePopover==='function'&&dropdown.matches(':popover-open'))dropdown.hidePopover();
+  dropdown.classList.remove('is-open');
+  document.getElementById('notif-bell').setAttribute('aria-expanded','false');
 }
 
 function markAllRead(){
   const lastSeenKey='cc_last_seen_release_'+(AUTH.user.id||'anon');
   const seenKey='cc_seen_msgs_'+(AUTH.user.id||'anon');
   const freqKey='cc_seen_freqs_'+(AUTH.user.id||'anon');
-  const releaseNotifs=_notifs.filter(n=>!n.source);
+  const releaseNotifs=_notifs.filter(n=>n.source==='release');
   const adminNotifs=_notifs.filter(n=>n.source==='admin');
   const freqNotifs=_notifs.filter(n=>n.source==='freq');
   if(releaseNotifs.length)localStorage.setItem(lastSeenKey,releaseNotifs[0].time);
@@ -3857,10 +3901,21 @@ function markAllRead(){
 
 /* Close dropdown when clicking outside */
 document.addEventListener('click',e=>{
-  if(_notifOpen&&!document.getElementById('notif-bell-wrap').contains(e.target)){
+  if(_notifOpen&&!document.getElementById('notif-bell-wrap').contains(e.target)&&!document.getElementById('notif-dropdown').contains(e.target)){
     closeNotifDropdown();
   }
 });
+document.getElementById('notif-dropdown').addEventListener('toggle',event=>{
+  _notifOpen=event.newState==='open';
+  document.getElementById('notif-bell').setAttribute('aria-expanded',String(_notifOpen));
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&_notifOpen){closeNotifDropdown();document.getElementById('notif-bell').focus({preventScroll:true});}
+});
+window.addEventListener('resize',positionNotifDropdown);
+window.addEventListener('scroll',positionNotifDropdown,{capture:true,passive:true});
+window.addEventListener('cc:theme-change',positionNotifDropdown);
+new MutationObserver(positionNotifDropdown).observe(document.querySelector('nav'),{attributes:true,attributeFilter:['style','class']});
 
 
 /* ══════════════════════════════════════════════════════
@@ -3870,6 +3925,7 @@ let _liveLatestRelease=null;
 let _liveBannerDismissed=false;
 
 async function startLiveReleaseCheck(){
+  if(!window.CC_CONFIG?.ENABLE_LIVE_RELEASE_BANNER)return;
   if(localStorage.getItem('cc_live_banner')==='0')return;
   /* Get initial latest */
   try{
@@ -3894,6 +3950,7 @@ async function startLiveReleaseCheck(){
 }
 
 function showLiveBanner(release){
+  if(!window.CC_CONFIG?.ENABLE_LIVE_RELEASE_BANNER||localStorage.getItem('cc_live_banner')==='0')return;
   const tag=release.tag_name||release.name||'New Release';
   const assets=(release.assets||[]).filter(a=>a.name.toLowerCase().endsWith('.rbxm'));
   const isConch=assets.some(a=>a.name.toLowerCase().includes('conch'));
@@ -3902,14 +3959,16 @@ function showLiveBanner(release){
   document.getElementById('lrb-text').innerHTML=`🆕 <strong>${type} ${tag}</strong> is now available!`;
   const btn=document.getElementById('lrb-scroll');
   btn.href=isConch?'#conch':'#cmdr';
-  document.getElementById('live-release-banner').classList.add('show');
+  const banner=document.getElementById('live-release-banner');
+  banner.hidden=false;banner.classList.add('show');
   /* Also trigger notification bell refresh */
   if(typeof initNotifications==='function')initNotifications();
 }
 
 function closeLiveBanner(){
   _liveBannerDismissed=true;
-  document.getElementById('live-release-banner').classList.remove('show');
+  const banner=document.getElementById('live-release-banner');
+  banner.hidden=true;banner.classList.remove('show');
 }
 
 /* ── AUTO UPDATE CHECK ──
@@ -4272,3 +4331,4 @@ initAuth().then(()=>{
 <script src="cursor-trail.js"></script>
 </body>
 </html>
+

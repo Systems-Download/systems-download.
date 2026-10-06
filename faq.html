@@ -127,9 +127,6 @@ footer{text-align:center;padding:3rem 2rem;font-family:var(--mono);font-size:.7r
 <nav>
   <a class="nav-logo" href="download.html"><span class="c">Conch</span><span class="sep">/</span><span class="r">Cmdr</span></a>
   <div class="nav-right">
-    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">
-      <span class="theme-icon" id="theme-icon">🌙</span>
-    </button>
     <button class="burger" id="burger-btn" onclick="toggleDrawer()" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
@@ -181,21 +178,7 @@ function openDrawer(){_dopen=true;['drawer','drawer-overlay','burger-btn'].forEa
 function closeDrawer(){_dopen=false;['drawer','drawer-overlay','burger-btn'].forEach(id=>document.getElementById(id).classList.remove('open'));document.body.style.overflow=''}
 
 /* THEME TOGGLE */
-function toggleTheme(){
-  const root=document.documentElement;
-  const icon=document.getElementById('theme-icon');
-  const isDark=!root.classList.contains('light-mode');
-  
-  if(isDark){
-    root.classList.add('light-mode');
-    icon.textContent='☀️';
-    localStorage.setItem('cc_theme','light');
-  }else{
-    root.classList.remove('light-mode');
-    icon.textContent='🌙';
-    localStorage.setItem('cc_theme','dark');
-  }
-}
+
 
 function loadTheme(){
   const savedTheme=localStorage.getItem('cc_theme');

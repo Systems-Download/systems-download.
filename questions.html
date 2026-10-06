@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Conch &amp; Cmdr — Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--conch:#0ff4c6;--cmdr:#ff4f5e;--bg:#0b0c0f;--surface:#13151a;--surface2:#1a1d24;--border:rgba(255,255,255,.09);--text:#e8eaf0;--muted:#929aab;--sans:'Space Grotesk',sans-serif;--mono:'JetBrains Mono',monospace}
+:root.light-mode{--bg:#f5f7fa;--surface:#fff;--surface2:#edf1f6;--border:rgba(0,0,0,.12);--text:#1a1d24;--muted:#526078}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans)}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit}
+button,a,input,textarea,select{touch-action:manipulation}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--conch);outline-offset:4px}
+nav{height:64px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 max(1.5rem,calc((100vw - 1060px)/2));position:sticky;top:0;z-index:10}
+.q-logo{font-weight:700;text-decoration:none;white-space:nowrap}.q-logo .c{color:var(--conch)}.q-logo .r{color:var(--cmdr)}.q-logo span{color:var(--muted)}
+.q-nav-actions{display:flex;gap:.5rem;align-items:center}
+.q-burger{width:40px;height:40px;display:flex;flex-direction:column;gap:4px;padding:10px}.q-burger span{display:block;width:17px;height:2px;background:currentColor;border-radius:2px}
+#q-menu{position:fixed;inset:72px 1rem auto auto;margin:0;padding:.8rem;min-width:200px;color:var(--text)}#q-menu .q-button{display:flex;justify-content:flex-start;margin:.3rem 0}#q-menu::backdrop{background:transparent}
+.q-button{display:inline-flex;gap:.5rem;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:10px;background:var(--surface2);color:var(--text);padding:.65rem 1rem;text-decoration:none;font-size:.82rem;cursor:pointer}
+.q-button:hover{border-color:var(--conch)}.q-button:disabled{opacity:.5;cursor:wait}
+.q-button-primary{border-color:var(--conch);background:color-mix(in srgb,var(--conch) 12%,var(--surface));font-weight:700}
+.q-page{max-width:1060px;margin:auto;padding:3.3rem 1.5rem 5rem}
+.q-eyebrow{display:flex;align-items:center;gap:.5rem;font:600 .65rem var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:.8rem}
+.q-dot{width:7px;height:7px;border-radius:50%;background:var(--conch);box-shadow:0 0 12px var(--conch)}
+.q-heading{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:2rem}
+h1{font-size:clamp(2rem,5vw,3rem);letter-spacing:-.04em;line-height:1.15;margin-bottom:.5rem}
+.q-sub{color:var(--muted);font-size:.9rem;line-height:1.7;max-width:640px}
+.q-panel,.q-thread,.q-post{background:var(--surface);border:1px solid var(--border);border-radius:18px}
+.q-banner{padding:1rem 1.2rem;margin-bottom:1.3rem;display:flex;gap:.8rem;align-items:center;font-size:.8rem;color:var(--muted)}
+.q-banner strong{color:var(--text)}
+.q-toolbar{padding:1rem;display:grid;grid-template-columns:minmax(150px,1fr) 160px 150px auto;gap:.65rem;margin-bottom:1rem}
+.q-input{display:block;width:100%;border:1px solid var(--border);border-radius:10px;background:var(--surface2);color:var(--text);padding:.7rem .85rem;font-size:.85rem;min-width:0}
+textarea.q-input{resize:vertical;min-height:130px;line-height:1.65}
+.q-input::placeholder{color:var(--muted)}
+.q-count{color:var(--muted);font: .7rem var(--mono);margin:1.2rem 0 .8rem}
+.q-feed{display:grid;gap:.75rem}
+.q-thread{display:block;width:100%;padding:1.2rem 1.4rem;text-align:left;color:var(--text);font:inherit;cursor:pointer}
+.q-thread-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.q-thread h2{font-size:1.05rem;line-height:1.5;overflow-wrap:anywhere}
+.q-preview{margin:.5rem 0 .7rem;color:var(--muted);font-size:.82rem;line-height:1.6;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.q-meta{display:flex;flex-wrap:wrap;gap:.4rem .9rem;align-items:center;font:.65rem var(--mono);color:var(--muted)}
+.q-reply-count{color:var(--muted);font:.7rem var(--mono);white-space:nowrap;padding-top:.3rem}
+.q-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin:.7rem 0}
+.q-tag{font:600 .62rem var(--mono);padding:.3rem .55rem;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)}
+.q-tag[data-tag=conch]{border-color:rgba(15,244,198,.4)}.q-tag[data-tag=cmdr]{border-color:rgba(255,79,94,.4)}.q-tag[data-tag=sentinel]{border-color:rgba(255,61,166,.4)}.q-tag[data-tag=answered]{border-color:#34d399;color:var(--text)}
+.q-tag-owner{background:color-mix(in srgb,var(--conch) 9%,var(--surface2))}
+.q-empty{padding:3rem 1rem;text-align:center}.q-empty h2{font-size:1.2rem;margin-bottom:.65rem}.q-empty p{color:var(--muted);font-size:.85rem;line-height:1.7}
+.q-alert{padding:.9rem 1.1rem;margin-bottom:1rem;border:1px solid rgba(255,79,94,.4);border-radius:12px;background:color-mix(in srgb,var(--cmdr) 8%,var(--surface));color:var(--text);font-size:.85rem;line-height:1.6}
+.q-pagination{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin:1rem 0;color:var(--muted);font-size:.75rem}
+.q-post{padding:1.4rem;margin:1rem 0}.q-post h2{font-size:1.55rem;line-height:1.4;letter-spacing:-.025em;overflow-wrap:anywhere}
+.q-post h2:focus{outline:none}
+.q-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:.9rem;margin-top:1.1rem}
+.q-owner-controls{padding:1rem 0 0;margin-top:1.2rem;border-top:1px solid var(--border)}
+.q-owner-controls .q-button{font-size:.7rem;padding:.4rem .7rem}.q-owner-controls [aria-pressed=true]{border-color:var(--conch)}
+.q-owner-label{color:var(--muted);font:.65rem var(--mono);margin-bottom:.7rem}
+.q-replies-title{margin:1.7rem 0 .7rem;font-size:1rem}
+.q-author{color:var(--text);font-weight:600}.q-owner-badge{font:.6rem var(--mono);padding:.2rem .45rem;border:1px solid var(--conch);border-radius:5px;color:var(--text)}
+.q-reply-form{padding:1.2rem}.q-reply-form label{display:block;font-size:.9rem;margin-bottom:.7rem}.q-form-actions{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1rem}
+.q-muted{color:var(--muted);font-size:.75rem;line-height:1.6}
+.q-compose{width:min(580px,calc(100vw - 2rem));margin:auto;max-height:calc(100dvh - 2rem);overflow:auto;padding:1.5rem;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:22px;box-shadow:0 24px 90px rgba(0,0,0,.4)}
+.q-compose::backdrop{background:rgba(5,12,25,.65);backdrop-filter:blur(8px)}
+.q-compose-header{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.2rem}.q-compose-header h2{font-size:1.3rem}
+.q-field{display:block;margin:1rem 0;font-size:.8rem}.q-field .q-input{margin-top:.5rem}
+.q-tag-fieldset{border:none;margin:1rem 0}.q-tag-fieldset legend{font-size:.8rem}.q-tag-checks{display:flex;flex-wrap:wrap;gap:.5rem;margin:.7rem 0}
+.q-tag-choice{display:flex;align-items:center;gap:.4rem;background:var(--surface2);padding:.5rem .6rem;border:1px solid var(--border);border-radius:8px;font-size:.75rem;cursor:pointer}.q-tag-choice:has(input:checked){border-color:var(--conch)}.q-tag-choice input{accent-color:var(--conch)}
+.q-gate{max-width:500px;padding:2rem;margin:1.5rem 0}.q-gate h2{margin-bottom:.7rem;font-size:1.2rem}.q-gate .q-button{margin-top:1rem}
+@media(max-width:720px){.q-toolbar{grid-template-columns:1fr 1fr}.q-toolbar .q-search-label{grid-column:1/-1}.q-heading{align-items:flex-start;flex-direction:column}.q-page{padding:2rem 1rem 3rem}nav{padding:0 1rem}.q-banner{align-items:flex-start}.q-thread{padding:1rem}.q-post{padding:1rem}.q-nav-actions .q-back-label{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<nav>
+  <a class="q-logo" href="download.html"><span class="c">Conch</span><span> / </span><span class="r">Cmdr</span></a>
+  <div class="q-nav-actions"><a class="q-button" href="download.html">← <span class="q-back-label">Downloads</span></a><button type="button" class="q-button q-burger" popovertarget="q-menu" aria-label="Menu"><span></span><span></span><span></span></button></div>
+</nav>
+<div id="q-menu" popover class="q-panel" role="navigation" aria-label="Page menu"><a class="q-button" href="download.html">Downloads</a><a class="q-button" href="questions.html" aria-current="page">Questions</a><a class="q-button" href="settings.html">Settings</a></div>
+<main class="q-page">
+  <div class="q-eyebrow"><span class="q-dot" aria-hidden="true"></span> Community / Questions &amp; answers</div>
+  <div class="q-heading"><div><h1>Questions</h1><p class="q-sub">A place for questions, ideas and helpful answers.<br>Conch, Cmdr, Sentinel — and everything in between.</p></div><button id="q-new" type="button" class="q-button q-button-primary" hidden>＋ New question</button></div>
+  <div id="q-error" class="q-alert" role="alert" hidden></div>
+  <section id="q-gate" class="q-panel q-gate" aria-labelledby="q-gate-title"><h2 id="q-gate-title">Join the conversation</h2><p id="q-gate-description" class="q-sub">Sign in to ask questions and share answers.</p><a id="q-login-link" class="q-button" href="download.html">Sign in</a>
+    <form id="q-unlock" hidden><label class="q-field" for="q-account-name">Account<input class="q-input" id="q-account-name" type="text" autocomplete="username" readonly></label><label class="q-field" for="q-password">Confirm your password<input class="q-input" id="q-password" type="password" autocomplete="current-password" required maxlength="1024"></label><button type="submit" class="q-button q-button-primary">Open Questions</button></form>
+  </section>
+  <div id="q-app" hidden>
+    <div class="q-panel q-banner"><span aria-hidden="true">✦</span><div><strong>Ask. Share. Find an answer.</strong> Choose a topic tag for your question. Max marks answers and keeps discussions organized.</div></div>
+    <section id="q-list-view" aria-label="Question feed">
+      <form class="q-panel q-toolbar" id="q-filters">
+        <label class="q-search-label"><span class="q-muted">Search</span><input class="q-input" id="q-search" type="search" maxlength="200" placeholder="Search questions…"></label>
+        <label><span class="q-muted">Topic</span><select class="q-input" id="q-filter-tag"><option value="">All topics</option></select></label>
+        <label><span class="q-muted">Status</span><select class="q-input" id="q-filter-status"><option value="all">All questions</option><option value="open">Unanswered</option><option value="answered">Answered</option></select></label>
+        <button type="submit" class="q-button" style="align-self:end">Search</button>
+      </form>
+      <p id="q-count" class="q-count" role="status"></p><div id="q-feed" class="q-feed" aria-busy="false"></div>
+      <div id="q-list-pagination" class="q-pagination" hidden><button type="button" class="q-button" id="q-list-prev">← Previous</button><span id="q-page-number"></span><button type="button" class="q-button" id="q-list-next">Next →</button></div>
+    </section>
+    <section id="q-thread-view" aria-label="Question discussion" hidden>
+      <div style="display:flex;justify-content:space-between;gap:1rem"><button type="button" class="q-button" id="q-back">← All questions</button><button type="button" class="q-button" id="q-refresh">Refresh</button></div>
+      <div id="q-discussion" aria-live="polite"></div>
+      <h3 class="q-replies-title" id="q-replies-title"></h3><div id="q-replies"></div>
+      <div id="q-reply-pagination" class="q-pagination" hidden><button type="button" class="q-button" id="q-reply-prev">← Previous replies</button><span id="q-reply-page"></span><button type="button" class="q-button" id="q-reply-next">More replies →</button></div>
+      <form id="q-reply-form" class="q-panel q-reply-form"><label for="q-reply-body">Add an answer or continue the discussion</label><textarea id="q-reply-body" class="q-input" placeholder="Share your answer…" required maxlength="5000"></textarea><div class="q-form-actions"><span class="q-muted">Be helpful. Stay on topic.</span><button type="submit" class="q-button q-button-primary">Send reply</button></div></form>
+      <p id="q-closed" class="q-muted" hidden>This discussion is closed. Max can reopen it by removing the Closed tag.</p>
+    </section>
+  </div>
+</main>
+<dialog id="q-compose" class="q-compose q-panel" aria-labelledby="q-compose-title">
+  <form id="q-create-form">
+    <div class="q-compose-header"><h2 id="q-compose-title">Start a question</h2><button type="button" class="q-button" id="q-compose-close" aria-label="Close new question">×</button></div>
+    <p class="q-muted">One clear question makes it easier to find a helpful answer.</p>
+    <label class="q-field" for="q-title">Title<input id="q-title" class="q-input" required minlength="5" maxlength="160" placeholder="What would you like to know?"></label>
+    <label class="q-field" for="q-body">Question<textarea id="q-body" class="q-input" required minlength="10" maxlength="10000" placeholder="Add details, context and what you have tried…"></textarea></label>
+    <fieldset class="q-tag-fieldset"><legend>Topic tags · choose 1–5</legend><div class="q-tag-checks" id="q-topic-tags"></div><p class="q-muted">Status tags such as Answered are added by Max after posting.</p></fieldset>
+    <p id="q-create-error" class="q-alert" role="alert" hidden></p>
+    <div class="q-form-actions"><span class="q-muted">Your question is saved with its replies.</span><button type="submit" class="q-button q-button-primary">Post question</button></div>
+  </form>
+</dialog>
+<dialog id="q-reply-editor" class="q-compose q-panel" aria-labelledby="q-reply-edit-title"><form id="q-reply-edit-form"><div class="q-compose-header"><h2 id="q-reply-edit-title">Edit reply</h2><button type="button" class="q-button" id="q-reply-edit-close" aria-label="Close reply editor">×</button></div><label class="q-field" for="q-edited-reply">Reply<textarea id="q-edited-reply" class="q-input" required maxlength="5000"></textarea></label><p id="q-reply-edit-error" class="q-alert" role="alert" hidden></p><button type="submit" class="q-button q-button-primary">Save reply</button></form></dialog>
+<script>
+(() => {
+  const $=id=>document.getElementById(id);
+  const api=window.CC_QUESTIONS;
+  let ready=false, tags=[], viewer=null, listOffset=0, replyOffset=0, activeThread=null, replyCount=0, listVersion=0, detailVersion=0, editingThread=null, editingReply=null;
+  const make=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
+  const date=value=>new Intl.DateTimeFormat('en',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));
+  function error(e,target='q-error') {
+    const el=$(target);el.textContent=e.code==='404'||e.code==='PGRST202'?'Questions is not available yet. Please try again after setup.':e.message||'Could not load Questions. Please try again.';el.hidden=false;
+    if(e.code==='42501'&&target==='q-error'){ready=false;$('q-app').hidden=true;$('q-new').hidden=true;showGate();}
+  }
+  function clearError(){ $('q-error').hidden=true; }
+  function badgeGroup(topicTags,ownerTags=[]) {
+    const row=make('div','q-tags');
+    [...topicTags,...ownerTags].forEach(slug=>{const tag=tags.find(t=>t.slug===slug);const badge=make('span','q-tag'+(tag?.owner_only?' q-tag-owner':''),tag?.label||slug);badge.dataset.tag=slug;row.appendChild(badge);});
+    return row;
+  }
+  function metadata(author,created,owner=false) {
+    const row=make('div','q-meta');row.appendChild(make('span','q-author',author));
+    if(owner)row.appendChild(make('span','q-owner-badge','Owner'));
+    const time=make('time','',date(created));time.dateTime=created;row.appendChild(time);return row;
+  }
+  function showGate() {
+    const auth=api.account();
+    $('q-gate').hidden=false;$('q-unlock').hidden=!auth;$('q-login-link').hidden=!!auth;
+    $('q-account-name').value=auth?.rawUsername||auth?.username||'';
+    $('q-gate-description').textContent=auth?'Confirm your password to continue as '+(auth.username||auth.rawUsername)+'.':'Sign in to ask questions and share answers.';
+  }
+  async function start() {
+    clearError();
+    try {
+      const data=await api.request('bootstrap');
+      viewer=data.user;tags=data.tags;
+      ready=true;$('q-gate').hidden=true;$('q-app').hidden=false;$('q-new').hidden=false;
+      $('q-filter-tag').replaceChildren(new Option('All topics',''));
+      $('q-topic-tags').replaceChildren();
+      tags.filter(t=>!t.owner_only).forEach(t=>{
+        $('q-filter-tag').appendChild(new Option(t.label,t.slug));
+        const label=make('label','q-tag-choice'),input=make('input');input.type='checkbox';input.name='topic';input.value=t.slug;label.append(input,document.createTextNode(t.label));$('q-topic-tags').appendChild(label);
+      });
+      await route();
+    } catch(e) {showGate();error(e);}
+  }
+  async function loadList() {
+    const version=++listVersion;clearError();$('q-feed').setAttribute('aria-busy','true');$('q-count').textContent='Loading questions…';
+    try {
+      const data=await api.request('list',{search:$('q-search').value.trim(),tag:$('q-filter-tag').value,status:$('q-filter-status').value,offset:listOffset});
+      if(version!==listVersion)return;
+      $('q-count').textContent=data.total+' question'+(data.total===1?'':'s')+' · newest activity first';$('q-feed').replaceChildren();
+      if(!data.items.length){const empty=make('div','q-panel q-empty');empty.append(make('h2','',data.total?'No questions on this page':$('q-search').value||$('q-filter-tag').value||$('q-filter-status').value!=='all'?'No matching questions':'The first question starts here'),make('p','','Try another filter or start a question using the button above.'));$('q-feed').appendChild(empty);}
+      data.items.forEach(t=>{
+        const card=make('button','q-thread');card.type='button';
+        const top=make('div','q-thread-top');top.append(make('h2','',t.title),make('span','q-reply-count','↳ '+t.reply_count+' repl'+(t.reply_count===1?'y':'ies')));
+        card.append(top,make('p','q-preview',t.preview),badgeGroup(t.tags,t.owner_tags),metadata(t.author,t.last_activity));
+        card.onclick=()=>{location.hash=t.id;};$('q-feed').appendChild(card);
+      });
+      $('q-list-pagination').hidden=data.total<=30;$('q-list-prev').disabled=listOffset===0;$('q-list-next').disabled=listOffset+30>=data.total;
+      $('q-page-number').textContent='Page '+(listOffset/30+1)+' of '+Math.max(1,Math.ceil(data.total/30));
+    } catch(e) {if(version===listVersion){$('q-count').textContent='Questions could not be loaded.';error(e);}}
+    finally {if(version===listVersion)$('q-feed').setAttribute('aria-busy','false');}
+  }
+  async function loadThread(id,focus=false) {
+    const version=++detailVersion;clearError();$('q-discussion').setAttribute('aria-busy','true');
+    try {
+      const data=await api.request('detail',{id,reply_offset:replyOffset});if(version!==detailVersion)return;
+      activeThread=data.thread;replyCount=data.reply_count;
+      const post=make('article','q-post');const title=make('h2','',activeThread.title);title.tabIndex=-1;
+      post.append(title,badgeGroup(activeThread.tags,activeThread.owner_tags),metadata(activeThread.author,activeThread.created_at),make('div','q-body',activeThread.body));
+      if(activeThread.edited_at)post.appendChild(make('p','q-muted','Edited '+date(activeThread.edited_at)));
+      if(activeThread.can_edit){
+        const actions=make('div','q-tags');
+        const edit=make('button','q-button','Edit question');edit.type='button';edit.disabled=!viewer.owner&&activeThread.owner_tags.includes('closed');edit.onclick=()=>openCompose(activeThread);
+        const remove=make('button','q-button','Delete question');remove.type='button';remove.onclick=async()=>{if(!confirm('Delete this question and all its replies?'))return;remove.disabled=true;try{await api.request('delete_thread',{id});location.hash='';}catch(e){error(e);}finally{remove.disabled=false;}};
+        actions.append(edit,remove);post.appendChild(actions);
+      }
+      if(viewer.owner) {
+        const controls=make('div','q-owner-controls');controls.appendChild(make('p','q-owner-label','OWNER STATUS TAGS'));
+        const row=make('div','q-tags');
+        tags.filter(t=>t.owner_only).forEach(t=>{
+          const button=make('button','q-button',t.label);button.type='button';const selected=activeThread.owner_tags.includes(t.slug);button.setAttribute('aria-pressed',String(selected));
+          button.onclick=async()=>{button.disabled=true;try{await api.request('tag',{id,tag:t.slug,enabled:!selected});await loadThread(id);}catch(e){error(e);}finally{button.disabled=false;}};
+          row.appendChild(button);
+        });controls.appendChild(row);post.appendChild(controls);
+      }
+      $('q-discussion').replaceChildren(post);$('q-replies').replaceChildren();$('q-replies-title').textContent=replyCount+' repl'+(replyCount===1?'y':'ies');
+      data.replies.forEach(r=>{
+        const reply=make('article','q-post');reply.append(metadata(r.author,r.created_at,r.owner),make('div','q-body',r.body));
+        if(r.edited_at)reply.appendChild(make('p','q-muted','Edited '+date(r.edited_at)));
+        if(r.can_edit){
+          const actions=make('div','q-tags'),edit=make('button','q-button','Edit reply'),remove=make('button','q-button','Delete reply');edit.type=remove.type='button';
+          edit.disabled=!viewer.owner&&activeThread.owner_tags.includes('closed');edit.onclick=()=>{editingReply={id:r.id,thread_id:id};$('q-edited-reply').value=r.body;$('q-reply-edit-error').hidden=true;$('q-reply-editor').showModal();};
+          remove.onclick=async()=>{if(!confirm('Delete this reply?'))return;remove.disabled=true;try{await api.request('delete_reply',{reply_id:r.id});replyOffset=Math.min(replyOffset,Math.floor(Math.max(0,replyCount-2)/50)*50);await loadThread(id);}catch(e){error(e);}finally{remove.disabled=false;}};
+          actions.append(edit,remove);reply.appendChild(actions);
+        }
+        $('q-replies').appendChild(reply);
+      });
+      if(!replyCount)$('q-replies').appendChild(make('p','q-muted','No replies yet. Start the conversation.'));
+      $('q-reply-pagination').hidden=replyCount<=50;$('q-reply-prev').disabled=replyOffset===0;$('q-reply-next').disabled=replyOffset+50>=replyCount;
+      $('q-reply-page').textContent='Replies '+(replyOffset+1)+'–'+Math.min(replyOffset+50,replyCount);
+      const closed=activeThread.owner_tags.includes('closed');$('q-reply-form').hidden=closed;$('q-closed').hidden=!closed;
+      if(focus)title.focus({preventScroll:true});
+    } catch(e) {if(version===detailVersion){$('q-discussion').replaceChildren();$('q-replies').replaceChildren();$('q-reply-form').hidden=true;$('q-replies-title').textContent='';$('q-reply-pagination').hidden=true;error(e);}}
+    finally {if(version===detailVersion)$('q-discussion').setAttribute('aria-busy','false');}
+  }
+  async function route() {
+    if(!ready)return;
+    const id=location.hash.slice(1),valid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    ++detailVersion;++listVersion;replyOffset=0;activeThread=null;
+    $('q-list-view').hidden=valid;$('q-thread-view').hidden=!valid;
+    window.scrollTo({top:0,behavior:'instant'});
+    if(valid){$('q-discussion').replaceChildren(make('p','q-muted','Loading discussion…'));$('q-replies').replaceChildren();$('q-reply-form').hidden=true;$('q-closed').hidden=true;$('q-reply-body').value='';await loadThread(id,true);}else{await loadList();}
+  }
+  $('q-unlock').onsubmit=async event=>{
+    event.preventDefault();const button=event.submitter;button.disabled=true;clearError();
+    try{const auth=api.account();if(!auth)throw new Error('Please sign in first.');await api.login(auth.rawUsername||auth.username,$('q-password').value);$('q-password').value='';await start();}catch(e){error(e);}finally{button.disabled=false;}
+  };
+  const compose=$('q-compose');
+  function openCompose(thread=null){
+    editingThread=thread?.id||null;$('q-create-form').reset();$('q-create-error').hidden=true;
+    $('q-compose-title').textContent=thread?'Edit question':'Start a question';$('q-create-form').querySelector('button[type=submit]').textContent=thread?'Save question':'Post question';
+    if(thread){$('q-title').value=thread.title;$('q-body').value=thread.body;$('q-topic-tags').querySelectorAll('input').forEach(input=>input.checked=thread.tags.includes(input.value));}
+    compose.showModal();
+  }
+  $('q-new').onclick=()=>openCompose();
+  $('q-compose-close').onclick=()=>compose.close();
+  compose.addEventListener('close',()=>$('q-new').focus());
+  $('q-create-form').onsubmit=async event=>{
+    event.preventDefault();const button=event.submitter,selected=[...$('q-topic-tags').querySelectorAll('input:checked')].map(x=>x.value);
+    if(!selected.length||selected.length>5){error(new Error('Select 1–5 topic tags.'),'q-create-error');return;}
+    button.disabled=true;$('q-create-error').hidden=true;
+    try{
+      const created=await api.request(editingThread?'edit_thread':'create',{id:editingThread,title:$('q-title').value.trim(),body:$('q-body').value.trim(),tags:selected});
+      const edited=!!editingThread;$('q-create-form').reset();compose.close();if(edited)await loadThread(created.id);else location.hash=created.id;
+    }catch(e){error(e,'q-create-error');}finally{button.disabled=false;}
+  };
+  $('q-reply-form').onsubmit=async event=>{
+    event.preventDefault();if(!activeThread)return;const button=event.submitter,id=activeThread.id;button.disabled=true;clearError();
+    try{await api.request('reply',{id,body:$('q-reply-body').value.trim()});$('q-reply-body').value='';replyOffset=Math.floor(replyCount/50)*50;await loadThread(id);}catch(e){error(e);}finally{button.disabled=false;}
+  };
+  $('q-reply-edit-close').onclick=()=>$('q-reply-editor').close();
+  $('q-reply-edit-form').onsubmit=async event=>{
+    event.preventDefault();if(!editingReply)return;const button=event.submitter;button.disabled=true;$('q-reply-edit-error').hidden=true;
+    try{await api.request('edit_reply',{reply_id:editingReply.id,body:$('q-edited-reply').value.trim()});$('q-reply-editor').close();await loadThread(editingReply.thread_id);}catch(e){error(e,'q-reply-edit-error');}finally{button.disabled=false;}
+  };
+  $('q-filters').onsubmit=event=>{event.preventDefault();listOffset=0;void loadList();};
+  ['q-filter-tag','q-filter-status'].forEach(id=>$(id).onchange=()=>{listOffset=0;void loadList();});
+  $('q-list-prev').onclick=()=>{listOffset=Math.max(0,listOffset-30);void loadList();};$('q-list-next').onclick=()=>{listOffset+=30;void loadList();};
+  $('q-reply-prev').onclick=()=>{replyOffset=Math.max(0,replyOffset-50);void loadThread(activeThread.id);};$('q-reply-next').onclick=()=>{replyOffset+=50;void loadThread(activeThread.id);};
+  $('q-refresh').onclick=()=>{if(activeThread)void loadThread(activeThread.id);else void route();};
+  $('q-back').onclick=()=>{location.hash='';};window.addEventListener('hashchange',()=>void route());
+  window.addEventListener('storage',event=>{if(event.key==='cc_auth'||event.key==='cc_questions_session'||event.key===null){ready=false;$('q-app').hidden=true;$('q-new').hidden=true;showGate();}});
+  showGate();if(api.saved())void start();
+})();
+</script>
+</body>
+</html>

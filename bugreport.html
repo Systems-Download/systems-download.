@@ -187,7 +187,6 @@ footer{text-align:center;padding:3rem 2rem;font-family:var(--mono);font-size:.72
   <a class="nav-logo" href="download.html"><span class="c">Conch</span><span class="sep">/</span><span class="r">Cmdr</span></a>
   <div class="nav-right">
     <a class="nav-back" href="download.html">← Back</a>
-    <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" id="theme-btn">🌙</button>
   </div>
 </nav>
 
@@ -343,12 +342,7 @@ let userIP='unknown';
 let currentUser=null;
 
 /* ── THEME ── */
-function toggleTheme(){
-  const root=document.documentElement,btn=document.getElementById('theme-btn');
-  const isDark=!root.classList.contains('light-mode');
-  if(isDark){root.classList.add('light-mode');btn.textContent='☀️';localStorage.setItem('cc_theme','light');}
-  else{root.classList.remove('light-mode');btn.textContent='🌙';localStorage.setItem('cc_theme','dark');}
-}
+
 (function(){
   const saved=localStorage.getItem('cc_theme'),btn=document.getElementById('theme-btn');
   if(saved==='light'){document.documentElement.classList.add('light-mode');if(btn)btn.textContent='☀️';}

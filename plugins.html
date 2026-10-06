@@ -146,7 +146,6 @@ footer{text-align:center;padding:3rem 2.5rem;font-family:var(--mono);font-size:.
       <span id="user-badge-name"></span>
     </div>
     <a class="nav-back" href="index.html">← Downloads</a>
-    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle Theme">🌙</button>
   </div>
 </nav>
 
@@ -195,12 +194,7 @@ let allPlugins=[];
 let currentFilter='all';
 
 /* ── THEME ── */
-function toggleTheme(){
-  const root=document.documentElement,btn=document.getElementById('theme-btn');
-  const isDark=!root.classList.contains('light-mode');
-  if(isDark){root.classList.add('light-mode');btn.textContent='☀️';localStorage.setItem('cc_theme','light');}
-  else{root.classList.remove('light-mode');btn.textContent='🌙';localStorage.setItem('cc_theme','dark');}
-}
+
 (function(){
   const s=localStorage.getItem('cc_theme'),btn=document.getElementById('theme-btn');
   if(s==='light'){document.documentElement.classList.add('light-mode');if(btn)btn.textContent='☀️';}

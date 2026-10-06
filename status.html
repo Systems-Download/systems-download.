@@ -151,7 +151,6 @@
 <nav>
   <a class="nav-logo" href="download.html"><span class="c">Conch</span><span class="sep">/</span><span class="r">Cmdr</span></a>
   <div class="nav-right">
-    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
     <button class="icon-btn" id="refresh-btn-nav" onclick="checkAll()" title="Refresh">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
@@ -239,11 +238,7 @@ function openDrawer(){_dopen=true;['drawer','drawer-overlay','burger-btn'].forEa
 function closeDrawer(){_dopen=false;['drawer','drawer-overlay','burger-btn'].forEach(id=>document.getElementById(id).classList.remove('open'));document.body.style.overflow=''}
 
 /* ── THEME ── */
-function toggleTheme(){
-  const root=document.documentElement,icon=document.getElementById('theme-icon'),isDark=!root.classList.contains('light-mode');
-  if(isDark){root.classList.add('light-mode');icon.textContent='☀️';localStorage.setItem('cc_theme','light');}
-  else{root.classList.remove('light-mode');icon.textContent='🌙';localStorage.setItem('cc_theme','dark');}
-}
+
 (function loadTheme(){
   const saved=localStorage.getItem('cc_theme'),icon=document.getElementById('theme-icon');
   if(saved==='light'){document.documentElement.classList.add('light-mode');if(icon)icon.textContent='☀️';}
