@@ -6,9 +6,13 @@
 
   const COLORS=['#0ff4c6','#ff4f5e','#a78bfa','#ffc832'];
   const particles=[];
+  const motionEnabled=()=>window.CC_THEME?.state().motion??!matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function clearParticles(){particles.splice(0).forEach(p=>p.el.remove());}
+  window.addEventListener('cc:theme-change',()=>{if(!motionEnabled())clearParticles();});
   let mouseX=0,mouseY=0,animRunning=false;
 
   document.addEventListener('mousemove',e=>{
+    if(!motionEnabled())return;
     mouseX=e.clientX;mouseY=e.clientY;
     spawnParticle(mouseX,mouseY);
     if(!animRunning){animRunning=true;requestAnimationFrame(tick);}
@@ -24,6 +28,7 @@
   }
 
   function tick(){
+    if(!motionEnabled()){clearParticles();animRunning=false;return;}
     for(let i=particles.length-1;i>=0;i--){
       const p=particles[i];
       p.x+=p.vx;p.y+=p.vy;p.vy+=.05;p.life-=p.decay;

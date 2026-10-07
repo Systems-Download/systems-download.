@@ -451,11 +451,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <!-- BUG REPORTS -->
     <div class="section-wrap" id="section-bugs">
       <div class="page-title">🐛 Bug Reports</div>
-      <div class="page-sub">Reports submitted via the bug report page</div>
+      <div class="page-sub">Open Report management for new reports and status updates. Older reports are listed below.</div>
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">🐛 Reports <span id="bugs-count-badge" class="sidebar-count"></span></div>
           <div class="panel-actions">
+            <a class="btn-action btn-primary" href="bugreport.html#reports" data-t="bug_manage_reports">Manage reports & status</a>
             <input class="panel-search" id="bugs-search" placeholder="Search..." oninput="filterBugs()">
             <button class="btn-action btn-primary" onclick="loadBugs()">↺ Refresh</button>
           </div>

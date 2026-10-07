@@ -11,6 +11,9 @@
   const preference=key=>{try{return localStorage.getItem(key);}catch{return null;}};
   const remember=key=>{try{localStorage.setItem(key,'1');}catch{}};
   const motionEnabled=()=>!root.classList.contains('cc-no-motion')&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.addEventListener('cc:theme-change',()=>{
+    if(!motionEnabled())document.querySelectorAll('.seasonal-particle,.seasonal-confetti').forEach(el=>el.remove());
+  });
 
   /* ── SEASONAL THEME ── */
   const SEASONS={
@@ -308,6 +311,7 @@
     const colors=['#0ff4c6','#ff4f5e','#ffc832','#a78bfa','#34d399','#f97316','#f472b6'];
     for(let i=0;i<(motionEnabled()?80:0);i++){
       const c=document.createElement('div');
+      c.className='seasonal-confetti';
       const color=colors[Math.floor(Math.random()*colors.length)];
       const size=6+Math.random()*8;
       c.style.cssText=`

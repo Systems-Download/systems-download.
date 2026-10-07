@@ -1,11 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conch & Cmdr — Bug Report</title>
-<meta name="description" content="Report a bug for Conch, Cmdr, or Sentinel — sent directly to our Discord for fast fixes.">
+<html lang="en"><head><meta charset="UTF-8"><link rel="icon" href="icon.svg" type="image/svg+xml"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer"><title>Conch & Cmdr — Bug Reports</title><meta name="description" content="Report a bug for Conch, Cmdr or Sentinel and follow its progress.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -151,413 +146,53 @@ footer{text-align:center;padding:3rem 2rem;font-family:var(--mono);font-size:.72
       scroll-behavior: auto !important;
     }
   }
-</style>
 
-<script>
-/* ── CC SETTINGS LOADER ── */
-(function(){
-  function get(key,def){return localStorage.getItem(key)??def;}
-  /* Theme */
-  const useSystem=get('cc_system_theme','0')==='1';
-  if(useSystem){
-    document.documentElement.classList.toggle('light-mode',window.matchMedia('(prefers-color-scheme:light)').matches);
-  }else{
-    if(get('cc_theme','dark')==='light')document.documentElement.classList.add('light-mode');
-  }
-  /* Accent color */
-  const accent=get('cc_accent','#0ff4c6');
-  if(accent&&accent!=='#0ff4c6')document.documentElement.style.setProperty('--conch',accent);
-  /* Animations */
-  if(get('cc_animations','1')==='0'){
-    const s=document.createElement('style');
-    s.textContent='*{animation-duration:0.001ms!important;transition-duration:0.001ms!important}';
-    document.head.appendChild(s);
-  }
-})();
-</script>
-<script src="i18n.js"></script>
-<script src="config.js"></script>
-<script src="cc-errors.js"></script>
-</head>
-<body>
-
-<div id="toast-container"></div>
-
-<nav>
-  <a class="nav-logo" href="download.html"><span class="c">Conch</span><span class="sep">/</span><span class="r">Cmdr</span></a>
-  <div class="nav-right">
-    <a class="nav-back" href="download.html">← Back</a>
-  </div>
-</nav>
-
-<div class="page">
-
-  <!-- HEADER -->
-  <div class="page-header">
-    <span class="page-icon">🐛</span>
-    <h1 class="page-title">Report a <span>Bug</span></h1>
-    <p class="page-sub">Found something broken? Tell us what happened and we'll fix it as fast as possible. Every report goes directly to our Discord.</p>
-  </div>
-
-  <!-- NOT LOGGED IN NOTICE -->
-  <div class="auth-notice" id="auth-notice" style="display:none">
-    ⚠️ You are not logged in. Your report will be sent anonymously. <a href="download.html">Log in</a> to attach your account.
-  </div>
-
-  <!-- SUCCESS STATE -->
-  <div class="success-card" id="success-card">
-    <span class="success-icon">✅</span>
-    <div class="success-title">Report Sent!</div>
-    <p class="success-desc">Your bug report has been forwarded to our Discord. We'll look into it as soon as possible — thank you for helping us improve!</p>
-    <div class="success-id" id="success-id">Report ID: —</div>
-    <br>
-    <a class="success-btn" href="download.html">← Back to Downloads</a>
-  </div>
-
-  <!-- FORM CARD -->
-  <div class="form-card" id="form-card">
-
-    <!-- SECTION: CATEGORY -->
-    <div class="form-card-header">
-      <div class="form-card-icon">📂</div>
-      <div>
-        <div class="form-card-title">Bug Category</div>
-        <div class="form-card-sub">What area of the site is affected?</div>
-      </div>
-    </div>
-    <div class="form-body" style="padding-bottom:.5rem">
-      <div class="cat-grid" id="cat-grid">
-        <label class="cat-card active" data-cat="download"><span class="cat-icon">📥</span>Download</label>
-        <label class="cat-card" data-cat="login"><span class="cat-icon">🔑</span>Login / Register</label>
-        <label class="cat-card" data-cat="ui"><span class="cat-icon">🎨</span>UI / Visual</label>
-        <label class="cat-card" data-cat="performance"><span class="cat-icon">⚡</span>Performance</label>
-        <label class="cat-card" data-cat="search"><span class="cat-icon">🔍</span>Search</label>
-        <label class="cat-card" data-cat="other"><span class="cat-icon">❓</span>Other</label>
-      </div>
-    </div>
-
-    <div class="form-divider"></div>
-
-    <!-- SECTION: SEVERITY -->
-    <div class="form-card-header" style="border-top:none;border-bottom:none;padding-bottom:0">
-      <div class="form-card-icon" style="background:rgba(255,200,50,.1)">⚠️</div>
-      <div>
-        <div class="form-card-title">Severity</div>
-        <div class="form-card-sub">How bad is it?</div>
-      </div>
-    </div>
-    <div class="form-body" style="padding-top:.75rem;padding-bottom:.5rem">
-      <div class="sev-row" id="sev-row">
-        <span class="sev-badge s-low" data-sev="low">🟢 Low — minor annoyance</span>
-        <span class="sev-badge s-med active" data-sev="medium">🟡 Medium — affects usability</span>
-        <span class="sev-badge s-high" data-sev="high">🟠 High — major issue</span>
-        <span class="sev-badge s-crit" data-sev="critical">🔴 Critical — site broken</span>
-      </div>
-    </div>
-
-    <div class="form-divider"></div>
-
-    <!-- SECTION: DETAILS -->
-    <div class="form-card-header" style="border-top:none;border-bottom:none;padding-bottom:0">
-      <div class="form-card-icon" style="background:rgba(15,244,198,.1)">📝</div>
-      <div>
-        <div class="form-card-title">Bug Details</div>
-        <div class="form-card-sub">Be as specific as possible</div>
-      </div>
-    </div>
-    <div class="form-body" style="padding-top:1rem">
-
-      <div class="form-err" id="form-err"></div>
-
-      <div class="field">
-        <label class="field-label">Title <span class="req">*</span></label>
-        <input class="field-input" id="f-title" type="text" placeholder="Short description of the bug" maxlength="100" oninput="updateChar('f-title','title-chars',100)">
-        <div class="char-counter" id="title-chars">0 / 100</div>
-      </div>
-
-      <div class="field">
-        <label class="field-label">What happened? <span class="req">*</span></label>
-        <textarea class="field-input field-textarea" id="f-desc" placeholder="Describe the bug in detail. What did you do? What did you expect vs what actually happened?" maxlength="2000" oninput="updateChar('f-desc','desc-chars',2000)"></textarea>
-        <div class="char-counter" id="desc-chars">0 / 2000</div>
-      </div>
-
-      <div class="field">
-        <label class="field-label">Steps to Reproduce</label>
-        <textarea class="field-input field-textarea" id="f-steps" placeholder="1. Go to...&#10;2. Click on...&#10;3. See error" style="min-height:90px"></textarea>
-        <div class="field-hint">Optional but very helpful</div>
-      </div>
-
-      <div class="field">
-        <label class="field-label">Screenshot URL</label>
-        <input class="field-input" id="f-screenshot" type="url" placeholder="https://imgur.com/... or any image link">
-        <div class="field-hint">Upload to imgur.com and paste the link here</div>
-      </div>
-
-      <div class="form-divider"></div>
-
-      <!-- AUTO COLLECTED INFO -->
-      <div class="field-label" style="margin-bottom:.6rem">📊 Auto-collected info <span style="font-size:.62rem;opacity:.6;margin-left:.4rem">(sent with report)</span></div>
-      <div class="info-grid" id="info-grid">
-        <div class="info-pill">
-          <div class="info-pill-label">Browser</div>
-          <div class="info-pill-value" id="info-browser">—</div>
-        </div>
-        <div class="info-pill" style="display:none">
-          <div class="info-pill-label">IP Address</div>
-          <div class="info-pill-value" id="info-ip">Hidden</div>
-        </div>
-        <div class="info-pill">
-          <div class="info-pill-label">Page</div>
-          <div class="info-pill-value" id="info-page">—</div>
-        </div>
-        <div class="info-pill">
-          <div class="info-pill-label">Reported by</div>
-          <div class="info-pill-value" id="info-user">—</div>
-        </div>
-      </div>
-
-      <div class="submit-row">
-        <button class="submit-btn" id="submit-btn" onclick="submitReport()">
-          🐛 Send Bug Report
-        </button>
-        <div class="submit-note">Sent directly to our Discord.<br>We'll respond as fast as possible.</div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<footer>Conch & Cmdr — Bug Report System · Reports are sent via Discord Webhook</footer>
-
-<script>
-/* ── CONFIG ── */
-const DISCORD_WEBHOOK=window.CC_CONFIG.DISCORD_WEBHOOK;
-const SB_URL=window.CC_CONFIG.SB_URL;
-const SB_KEY=window.CC_CONFIG.SB_KEY;
-
-/* ── STATE ── */
-let selectedCat='download';
-let selectedSev='medium';
-let userIP='unknown';
-let currentUser=null;
-
-/* ── THEME ── */
-
-(function(){
-  const saved=localStorage.getItem('cc_theme'),btn=document.getElementById('theme-btn');
-  if(saved==='light'){document.documentElement.classList.add('light-mode');if(btn)btn.textContent='☀️';}
-})();
-
-/* ── CATEGORY SELECTION ── */
-document.querySelectorAll('.cat-card').forEach(card=>{
-  card.addEventListener('click',()=>{
-    document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
-    card.classList.add('active');
-    selectedCat=card.dataset.cat;
-  });
-});
-
-/* ── SEVERITY SELECTION ── */
-document.querySelectorAll('.sev-badge').forEach(badge=>{
-  badge.addEventListener('click',()=>{
-    document.querySelectorAll('.sev-badge').forEach(b=>b.classList.remove('active'));
-    badge.classList.add('active');
-    selectedSev=badge.dataset.sev;
-  });
-});
-
-/* ── CHAR COUNTER ── */
-function updateChar(inputId,counterId,max){
-  const val=document.getElementById(inputId).value.length;
-  const el=document.getElementById(counterId);
-  el.textContent=val+' / '+max;
-  el.classList.toggle('warn',val>max*0.8&&val<=max);
-  el.classList.toggle('over',val>max);
-}
-
-/* ── AUTO INFO ── */
-async function loadAutoInfo(){
-  /* Browser */
-  const ua=navigator.userAgent;
-  let browser='Unknown';
-  if(ua.includes('Chrome')&&!ua.includes('Edg'))browser='Chrome';
-  else if(ua.includes('Firefox'))browser='Firefox';
-  else if(ua.includes('Safari')&&!ua.includes('Chrome'))browser='Safari';
-  else if(ua.includes('Edg'))browser='Edge';
-  else if(ua.includes('Opera')||ua.includes('OPR'))browser='Opera';
-  const ver=(ua.match(/(Chrome|Firefox|Safari|Edg|OPR)\/(\d+)/)||[])[2]||'';
-  document.getElementById('info-browser').textContent=browser+(ver?' '+ver:'');
-
-  /* Page */
-  document.getElementById('info-page').textContent=window.location.href.replace(/^https?:\/\//,'').slice(0,40);
-
-  /* User from session */
-  try{
-    const saved=localStorage.getItem('cc_auth');
-    if(saved){
-      const parsed=JSON.parse(saved);
-      if(parsed&&parsed.username){
-        currentUser=parsed;
-        document.getElementById('info-user').textContent=parsed.username;
-        document.getElementById('auth-notice').style.display='none';
-      }
-    }
-  }catch{}
-  if(!currentUser){
-    document.getElementById('info-user').textContent='Anonymous';
-    document.getElementById('auth-notice').style.display='flex';
-  }
-
-  /* IP */
-  try{
-    const r=await fetch('https://api.ipify.org?format=json');
-    const d=await r.json();
-    userIP=d.ip||'unknown';
-    document.getElementById('info-ip').textContent='Hidden';
-  }catch{
-    userIP='unknown';
-    document.getElementById('info-ip').textContent='Hidden';
-  }
-}
-
-/* ── TOAST ── */
-function toast(msg,type='ok',dur=3500){
-  const c=document.getElementById('toast-container');
-  const el=document.createElement('div');el.className='toast';
-  const col={ok:'#3cc878',err:'#ff4f5e',warn:'#ffc832'}[type]||'#0ff4c6';
-  const ico={ok:'✓',err:'✕',warn:'!'}[type]||'⚑';
-  el.innerHTML=`<span>${ico}</span><span style="flex:1">${msg}</span><div class="t-bar" style="background:${col};animation-duration:${dur}ms"></div>`;
-  c.appendChild(el);
-  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),320)},dur);
-}
-
-/* ── GENERATE REPORT ID ── */
-function genID(){return 'BUG-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
-
-/* ── SUBMIT ── */
-async function submitReport(){
-  const title=document.getElementById('f-title').value.trim();
-  const desc=document.getElementById('f-desc').value.trim();
-  const steps=document.getElementById('f-steps').value.trim();
-  const screenshot=document.getElementById('f-screenshot').value.trim();
-  const errEl=document.getElementById('form-err');
-  const btn=document.getElementById('submit-btn');
-
-  errEl.classList.remove('vis');
-  document.getElementById('f-title').classList.remove('err');
-  document.getElementById('f-desc').classList.remove('err');
-
-  /* Validation */
-  if(!title){
-    errEl.textContent='⚠️ Please enter a title for the bug.';errEl.classList.add('vis');
-    document.getElementById('f-title').classList.add('err');
-    document.getElementById('f-title').focus();return;
-  }
-  if(title.length<5){
-    errEl.textContent='⚠️ Title must be at least 5 characters.';errEl.classList.add('vis');return;
-  }
-  if(!desc){
-    errEl.textContent='⚠️ Please describe the bug.';errEl.classList.add('vis');
-    document.getElementById('f-desc').classList.add('err');
-    document.getElementById('f-desc').focus();return;
-  }
-  if(desc.length<20){
-    errEl.textContent='⚠️ Description must be at least 20 characters.';errEl.classList.add('vis');return;
-  }
-  if(screenshot&&!/^https?:\/\//.test(screenshot)){
-    errEl.textContent='⚠️ Screenshot must be a valid URL (starting with http/https).';errEl.classList.add('vis');return;
-  }
-
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span> Sending...';
-
-  try{
-    const reportId=genID();
-    const ts=new Date().toISOString();
-    const ua=navigator.userAgent;
-
-    /* Category labels */
-    const catLabel={download:'📥 Download',login:'🔑 Login/Register',ui:'🎨 UI/Visual',performance:'⚡ Performance',search:'🔍 Search',other:'❓ Other'}[selectedCat]||selectedCat;
-    const sevLabel={low:'🟢 Low',medium:'🟡 Medium',high:'🟠 High',critical:'🔴 Critical'}[selectedSev]||selectedSev;
-    const sevColor={low:0x3cc878,medium:0xffc832,high:0xff8c42,critical:0xff4f5e}[selectedSev]||0xff4f5e;
-
-    /* Build Discord Embed */
-    const fields=[
-      {name:'👤 Reporter',value:currentUser?'`'+currentUser.username+'`':'`Anonymous`',inline:true},
-      {name:'📂 Category',value:catLabel,inline:true},
-      {name:'⚠️ Severity',value:sevLabel,inline:true},
-      {name:'🌐 IP Address',value:'`Unknown`',inline:true},
-      {name:'🆔 Report ID',value:'`'+reportId+'`',inline:true},
-      {name:'📅 Time',value:'`'+new Date().toLocaleString('en-US')+'`',inline:true},
-      {name:'📝 Description',value:desc.length>1024?desc.slice(0,1021)+'…':desc,inline:false},
-    ];
-    if(steps){fields.push({name:'🔁 Steps to Reproduce',value:steps.length>512?steps.slice(0,509)+'…':steps,inline:false});}
-    fields.push({name:'🖥️ Browser / UA',value:'`'+(ua.slice(0,120))+'`',inline:false});
-    fields.push({name:'🔗 Page',value:window.location.href,inline:false});
-    if(screenshot){fields.push({name:'📸 Screenshot',value:screenshot,inline:false});}
-
-    const embed={
-      title:'🐛 '+title,
-      color:sevColor,
-      fields,
-      footer:{text:'Conch & Cmdr Bug Report • '+reportId},
-    };
-    if(screenshot&&/\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(screenshot)){embed.image={url:screenshot};}
-    if(currentUser&&currentUser.avatar_url){embed.thumbnail={url:currentUser.avatar_url};}
-
-    const res=await fetch(DISCORD_WEBHOOK,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        username:'🐛 Bug Report Bot',
-        avatar_url:'https://i.imgur.com/Qi3oxvb.png',
-        embeds:[embed]
-      })
-    });
-
-    if(!res.ok&&res.status!==204){throw new Error('Webhook error: '+res.status);}
-
-    /* Optional: Save to Supabase */
-    await fetch(SB_URL+'/rest/v1/cc_bug_reports',{
-      method:'POST',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({
-        report_id:reportId,
-        username:currentUser?currentUser.username:'anonymous',
-        user_id:currentUser?currentUser.id:null,
-        title,description:desc,
-        steps_to_reproduce:steps||null,
-        category:selectedCat,severity:selectedSev,
-        screenshot_url:screenshot||null,
-        ip:userIP,browser:ua,page:window.location.href,
-        created_at:ts
-      })
-    }).catch(()=>{});/* Non-fatal — Discord is the primary */
-
-    /* Show success */
-    document.getElementById('form-card').style.display='none';
-    document.getElementById('success-id').textContent='Report ID: '+reportId;
-    document.getElementById('success-card').classList.add('vis');
-    window.scrollTo({top:0,behavior:'smooth'});
-    toast('Bug report sent successfully!','ok',4000);
-
-  }catch(e){
-    errEl.textContent='❌ Failed to send report: '+e.message+'. Please try again.';
-    errEl.classList.add('vis');
-    btn.disabled=false;
-    btn.innerHTML='🐛 Send Bug Report';
-    toast('Failed to send report','err',3500);
-  }
-}
-
-/* ── INIT ── */
-loadAutoInfo();
-
-/* Keyboard shortcut: Ctrl+Enter to submit */
-document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){submitReport();}
-});
-</script>
-<script src="cursor-trail.js"></script>
-</body>
-</html>
+[hidden]{display:none!important}
+.page{max-width:900px;padding-top:max(7rem,calc(var(--glass-nav-bottom,76px) + 2rem))}
+.form-card{opacity:1}.success-card{display:block}.form-err{display:block}.auth-notice{display:flex}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.field-label{letter-spacing:.04em}.field-label:has(+[required])::after{content:'*';color:var(--cmdr)}
+.field-check{display:flex;align-items:center;gap:.5rem;font: .75rem var(--mono);margin-top:.4rem;line-height:1.5}
+.field-input:disabled{opacity:.5}.field-hint{opacity:1}
+.report-panel{margin-top:2rem;padding:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:24px}
+.report-panel h2{font-size:1.3rem;margin-bottom:1rem}.report-panel p{font:.78rem/1.7 var(--mono);color:var(--muted)}
+.report-toolbar,.report-account,.report-pagination{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin:1rem 0}
+.report-toolbar select{max-width:220px}.report-toolbar button,.report-pagination button,.report-account button{margin-left:auto}
+.report-pagination button{margin:0}.report-pagination{justify-content:space-between}
+.report-row{display:grid;grid-template-columns:1fr auto;gap:.5rem;text-align:left;width:100%;border:1px solid var(--border);border-radius:14px;background:var(--surface2);color:var(--text);padding:1rem;font: .8rem var(--mono);cursor:pointer;margin:.6rem 0}
+.report-row strong{overflow-wrap:anywhere}.report-row small{color:var(--muted);font-size:.65rem}
+.report-status{display:inline-block;width:fit-content;padding:.3rem .6rem;border:1px solid var(--border);border-radius:99px;font: .7rem var(--mono);background:var(--surface2)}
+.report-status[data-status="fixed"]{color:var(--conch)}.report-status[data-status="in-progress"]{color:#f5b94a}
+.report-receipt{display:block;border:1px solid var(--border);border-radius:12px;padding:.7rem 1rem;margin-top:.5rem;color:var(--text);background:var(--surface2);font: .8rem var(--mono);text-align:left;width:100%;cursor:pointer;overflow-wrap:anywhere}
+.bug-modal{width:min(680px,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);overflow:auto;margin:auto;background:var(--surface);color:var(--text);padding:1.5rem;border:1px solid var(--border);border-radius:24px;font-family:var(--sans)}
+.bug-modal::backdrop{background:rgba(3,8,15,.68);backdrop-filter:blur(6px)}
+.bug-modal h2{font-size:1.4rem;overflow-wrap:anywhere;margin-bottom:.6rem}.bug-modal h3{font-size:.8rem;color:var(--muted);margin:1.3rem 0 .45rem}.bug-modal small{display:block;font:.65rem/1.6 var(--mono);color:var(--muted);overflow-wrap:anywhere;margin-bottom:.75rem}
+.report-text{white-space:pre-wrap;overflow-wrap:anywhere;font:.8rem/1.7 var(--mono)}
+.report-history{border-left:2px solid var(--conch);padding:.5rem .8rem;margin:.6rem 0;font:.75rem var(--mono)}
+.report-close{display:block;margin-left:auto;margin-bottom:1rem}.report-message{font:.75rem/1.7 var(--mono);color:var(--muted);margin:.7rem 0;overflow-wrap:anywhere}.report-message.is-error{color:var(--cmdr)}
+#owner-status-form{border-top:1px solid var(--border);margin-top:1.5rem;padding-top:1.5rem}
+#success-link{font-size:.65rem;margin:.6rem 0}#success-card .submit-row{justify-content:center}
+.report-panel :is(button,input,select,textarea):focus-visible,.form-card :is(button,input,select,textarea):focus-visible{outline:2px solid var(--conch);outline-offset:3px}
+@media(max-width:600px){.field-grid{grid-template-columns:1fr;gap:0}.page{padding-left:1rem;padding-right:1rem}.report-panel{padding:1rem}.report-row{grid-template-columns:1fr}.report-toolbar select{width:100%;max-width:none}}
+</style><script src="i18n.js"></script><script src="config.js"></script><script src="cc-errors.js"></script></head><body>
+<nav><a class="nav-logo" href="download.html"><span class="c">Conch</span><span class="sep">/</span><span class="r">Cmdr</span></a><a class="nav-back" href="download.html">← <span data-t="back">Back</span></a></nav>
+<main class="page"><header class="page-header"><span class="page-icon" aria-hidden="true">🐛</span><h1 class="page-title" data-t="bugreport_title">Report a Bug</h1><p class="page-sub" data-t="bug_intro">Describe the problem and follow its progress here.</p><a class="success-btn" href="#reports" data-t="bug_my_reports">My reports</a></header>
+<div class="auth-notice" id="auth-notice"><span data-t="bug_anon_notice">Sign in below to attach your account, or submit anonymously and keep your private status link.</span></div>
+<section class="success-card" id="success-card" hidden aria-live="polite"><span class="success-icon" aria-hidden="true">✅</span><h2 class="success-title" data-t="bug_saved">Report saved</h2><p class="success-desc" data-t="bug_saved_desc">Your report has been saved. Keep this private link to follow its status.</p><div class="success-id" id="success-id"></div><label for="success-link" class="field-label" data-t="bug_private_link">Private status link</label><input class="field-input" id="success-link" readonly><div class="submit-row"><button type="button" class="success-btn" id="success-copy" data-t="profile_copy_link">Copy link</button><button type="button" class="success-btn" id="success-track" data-t="bug_view_status">View status</button><button type="button" class="success-btn" id="success-new" data-t="bug_new_report">New report</button></div><p id="success-warning" class="report-message" role="status" hidden></p></section>
+<section class="form-card" id="form-card"><div class="form-card-header"><span class="form-card-icon" aria-hidden="true">📝</span><h2 class="form-card-title" data-t="bug_details">Bug details</h2></div><form id="bug-form" class="form-body">
+<p class="field-hint" data-t="bug_required_hint">Fields marked * are required. Enter Unknown if you do not know the version.</p><br>
+<div class="field-grid"><div class="field"><label for="f-tool" class="field-label" data-t="bug_tool"></label><select id="f-tool" class="field-input field-select" required><option value="" data-t="bug_choose_tool">Choose a tool</option><option value="conch">Conch</option><option value="cmdr">Cmdr</option><option value="sentinel">Sentinel</option><option value="website" data-t="bug_tool_website">Website</option><option value="other" data-t="bug_tool_other">Other</option></select></div><div class="field"><label for="f-version" class="field-label" data-t="bug_version"></label><input id="f-version" class="field-input" required maxlength="80" data-t-placeholder="bug_version_placeholder" placeholder="e.g. 1.4.2 or Unknown"></div></div>
+<div class="field-grid"><div class="field"><label for="f-category" class="field-label" data-t="bugreport_category"></label><select id="f-category" class="field-input field-select"><option value="download" data-t="nav_downloads">Download</option><option value="login" data-t="bug_category_login">Login / Register</option><option value="ui" data-t="bug_category_ui">UI / Visual</option><option value="performance" data-t="bug_category_performance">Performance</option><option value="search" data-t="bug_category_search">Search</option><option value="other" data-t="bug_tool_other">Other</option></select></div><div class="field"><label for="f-severity" class="field-label" data-t="bug_severity"></label><select id="f-severity" class="field-input field-select"><option value="low" data-t="bug_severity_low">Low</option><option value="medium" selected data-t="bug_severity_medium">Medium</option><option value="high" data-t="bug_severity_high">High</option><option value="critical" data-t="bug_severity_critical">Critical</option></select></div></div>
+<div class="field"><label for="f-title" class="field-label" data-t="bugreport_title_field"></label><input id="f-title" class="field-input" required minlength="5" maxlength="100" data-counter="title-chars" data-t-placeholder="bug_title_placeholder"><div class="char-counter" id="title-chars">0 / 100</div></div>
+<div class="field"><label for="f-desc" class="field-label" data-t="bugreport_desc"></label><textarea id="f-desc" class="field-input field-textarea" required minlength="20" maxlength="2000" data-counter="desc-chars" data-t-placeholder="bug_desc_placeholder"></textarea><div class="char-counter" id="desc-chars">0 / 2000</div></div>
+<div class="field"><label for="f-error" class="field-label" data-t="bug_error_message"></label><textarea id="f-error" class="field-input field-textarea" required maxlength="2000" data-counter="error-chars" data-t-placeholder="bug_error_placeholder"></textarea><div class="char-counter" id="error-chars">0 / 2000</div><label class="field-check"><input type="checkbox" id="f-no-error"><span data-t="bug_no_error">No error message appeared</span></label></div>
+<div class="field"><label for="f-steps" class="field-label" data-t="bug_steps"></label><textarea id="f-steps" class="field-input field-textarea" required minlength="5" maxlength="2000" data-counter="steps-chars" data-t-placeholder="bug_steps_placeholder"></textarea><div class="char-counter" id="steps-chars">0 / 2000</div></div>
+<div class="field"><label for="f-screenshot" class="field-label" data-t="bug_screenshot"></label><input id="f-screenshot" class="field-input" type="url" maxlength="1000" placeholder="https://…"><p class="field-hint" data-t="bug_screenshot_hint">Optional: paste a link to your screenshot.</p></div>
+<div class="info-grid"><div class="info-pill"><div class="info-pill-label" data-t="bug_browser">Browser</div><div class="info-pill-value" id="info-browser"></div></div><div class="info-pill"><div class="info-pill-label" data-t="bug_reporter">Reported by</div><div class="info-pill-value" id="info-user"></div></div><div class="info-pill"><div class="info-pill-label" data-t="bug_page">Page</div><div class="info-pill-value" id="info-page"></div></div></div>
+<p id="form-err" class="form-err" role="alert" hidden></p><div class="submit-row"><button type="submit" class="submit-btn" id="submit-btn" data-t="bugreport_send">Send report</button><span class="submit-note" data-t="bug_submit_note">Saved in Supabase. A notification is also sent to Discord.</span></div></form></section>
+<section id="reports" class="report-panel"><h2 id="reports-heading" data-t="bug_my_reports">My reports</h2><form id="report-login"><p data-t="bug_login_hint">Sign in with your existing account to see your reports. Max can manage all reports.</p><div class="field-grid"><div class="field"><label for="report-username" class="field-label" data-t="login_username"></label><input id="report-username" class="field-input" autocomplete="username" required></div><div class="field"><label for="report-password" class="field-label" data-t="login_password"></label><input id="report-password" class="field-input" type="password" autocomplete="current-password" required></div></div><button class="success-btn" id="report-login-button" type="submit" data-t="login_btn">Sign in</button></form>
+<div id="report-account" class="report-account" hidden><strong id="report-account-name"></strong><button class="success-btn" id="report-logout" type="button" data-t="nav_logout">Log out</button></div><p id="reports-message" class="report-message" role="status" hidden></p>
+<div id="local-reports-wrap" hidden><h3 data-t="bug_saved_links">Reports saved on this device</h3><div id="local-reports"></div></div>
+<div id="account-report-list" hidden><div class="report-toolbar"><label for="reports-filter" data-t="bug_status">Status</label><select id="reports-filter" class="field-input"><option value="all" data-t="bug_status_all">All statuses</option><option value="open" data-t="bug_status_open">Open</option><option value="in-progress" data-t="bug_status_progress">In progress</option><option value="fixed" data-t="bug_status_fixed">Fixed</option><option value="closed" data-t="bug_status_closed">Closed</option></select><button class="success-btn" id="reports-refresh" type="button" data-t="refresh">Refresh</button></div><p id="reports-count"></p><div id="reports-list"></div><p id="reports-empty" data-t="bug_no_reports">No reports yet.</p><div class="report-pagination"><button class="success-btn" id="reports-prev" type="button" data-t="bug_previous">Previous</button><button class="success-btn" id="reports-next" type="button" data-t="bug_next">Next</button></div></div></section></main>
+<dialog id="report-dialog" class="bug-modal" aria-labelledby="report-dialog-title"><button type="button" id="report-close" class="success-btn report-close" data-t="close">Close</button><h2 id="report-dialog-title" data-t="bug_view_status">View status</h2><div id="report-detail"></div><form id="owner-status-form" hidden><h3 data-t="bug_manage_reports">Report management</h3><div class="field"><label for="owner-status" class="field-label" data-t="bug_status"></label><select id="owner-status" class="field-input"><option value="open" data-t="bug_status_open">Open</option><option value="in-progress" data-t="bug_status_progress">In progress</option><option value="fixed" data-t="bug_status_fixed">Fixed</option><option value="closed" data-t="bug_status_closed">Closed</option></select></div><div class="field"><label for="owner-note" class="field-label" data-t="bug_owner_note"></label><textarea id="owner-note" class="field-input field-textarea" maxlength="2000" data-t-placeholder="bug_note_hint"></textarea></div><button id="owner-status-save" class="success-btn" data-t="save">Save</button></form><p id="detail-message" class="report-message" role="status" hidden></p></dialog>
+<footer>Conch · Cmdr · Sentinel</footer><script src="bug-reports.js"></script><script src="cursor-trail.js"></script></body></html>

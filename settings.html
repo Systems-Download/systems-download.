@@ -158,6 +158,26 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       </div>
       <button type="button" class="connected-save-btn" data-t="choose_theme" onclick="CC_THEME.openPicker(this)">Choose theme</button>
     </div>
+    <div class="setting-row">
+      <div class="setting-left">
+        <label class="setting-label" for="s-glass-strength" data-t="glass_strength">Glass intensity</label>
+        <div class="setting-desc" id="glass-strength-desc" data-t="glass_strength_desc">Choose softer glass or stronger blur, reflections and depth. Applies when Liquid Glass is enabled.</div>
+      </div>
+      <select class="setting-select" id="s-glass-strength" aria-describedby="glass-strength-desc" onchange="save('cc_glass_strength',this.value);applyTheme()">
+        <option value="subtle" data-t="glass_subtle">Subtle</option>
+        <option value="strong" data-t="glass_strong">Strong</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div class="setting-left">
+        <label class="setting-label" for="s-reduce-motion" data-t="reduce_motion">Reduce motion</label>
+        <div class="setting-desc" id="reduce-motion-desc" data-t="reduce_motion_desc">Reduce transitions and disable moving reflections, particles and confetti. Your system preference is also respected.</div>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" class="toggle-input" id="s-reduce-motion" aria-describedby="reduce-motion-desc" onchange="save('cc_reduce_motion',this.checked?'1':'0');applyAnimations()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
 
     <div class="setting-row">
       <div class="setting-left">
@@ -475,6 +495,8 @@ const ACCENT_COLORS=[
 const DEFAULTS={
   cc_theme:'dark',
   cc_liquid_glass:'0',
+  cc_glass_strength:'strong',
+  cc_reduce_motion:'0',
   cc_system_theme:'0',
   cc_lang:'en',
   cc_compact_view:'0',
@@ -517,16 +539,9 @@ function applyTheme(){
 
 function applyAnimations(){
   window.CC_THEME.apply();
-  const on=get('cc_animations')==='1';
+  const on=window.CC_THEME.state().motion;
   document.documentElement.style.setProperty('--transition-speed',on?'.3s':'0s');
-  if(!on){
-    const style=document.getElementById('no-anim-style')||document.createElement('style');
-    style.id='no-anim-style';
-    style.textContent='*{animation-duration:0.001ms!important;transition-duration:0.001ms!important}';
-    document.head.appendChild(style);
-  }else{
-    const s=document.getElementById('no-anim-style');if(s)s.remove();
-  }
+  document.getElementById('no-anim-style')?.remove();
 }
 
 function applyCursorTrail(on){
@@ -618,6 +633,8 @@ function loadSettings(){
   document.getElementById('s-darkmode').checked=get('cc_theme')==='dark';
   document.getElementById('s-systemtheme').checked=get('cc_system_theme')==='1';
   document.getElementById('s-liquid-glass').checked=get('cc_liquid_glass')==='1';
+  document.getElementById('s-glass-strength').value=CC_THEME.state().glassStrength;
+  document.getElementById('s-reduce-motion').checked=CC_THEME.state().reduceMotion;
 
   /* Language */
   CC_I18N.apply();
@@ -754,6 +771,8 @@ loadSettings();
 
 window.addEventListener('cc:theme-change',()=>{
   document.getElementById('s-liquid-glass').checked=CC_THEME.state().glass;
+  document.getElementById('s-glass-strength').value=CC_THEME.state().glassStrength;
+  document.getElementById('s-reduce-motion').checked=CC_THEME.state().reduceMotion;
   document.getElementById('s-darkmode').checked=CC_THEME.state().mode==='dark';
   document.getElementById('s-systemtheme').checked=CC_THEME.state().system;
   document.querySelectorAll('.color-dot').forEach(dot=>{

@@ -1991,12 +1991,13 @@ function toast({title,sub,type='c',dur=3500}){
 }
 
 function confetti(){
+  if(!window.CC_THEME.state().motion||localStorage.getItem('cc_confetti')==='0')return;
   const cv=document.getElementById('confetti-canvas'),ctx=cv.getContext('2d');
   cv.width=window.innerWidth;cv.height=window.innerHeight;
   const cols=['#0ff4c6','#ff4f5e','#ffc832','#64a0ff','#ff8c42','#a78bfa'];
   const ps=Array.from({length:70},()=>({x:Math.random()*cv.width,y:-10-Math.random()*60,r:4+Math.random()*5,col:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*3,vy:2+Math.random()*4,rot:Math.random()*Math.PI*2,rv:(Math.random()-.5)*.2,sq:Math.random()>.5}));
   let af,alpha=1;
-  function draw(){ctx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.col;if(p.sq){ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r)}else{ctx.beginPath();ctx.arc(0,0,p.r/2,0,Math.PI*2);ctx.fill()}ctx.restore();p.x+=p.vx;p.y+=p.vy;p.rot+=p.rv;p.vy+=.06});
+  function draw(){ctx.clearRect(0,0,cv.width,cv.height);if(!window.CC_THEME.state().motion)return;ps.forEach(p=>{ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.col;if(p.sq){ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r)}else{ctx.beginPath();ctx.arc(0,0,p.r/2,0,Math.PI*2);ctx.fill()}ctx.restore();p.x+=p.vx;p.y+=p.vy;p.rot+=p.rv;p.vy+=.06});
   if(ps.every(p=>p.y>cv.height)){alpha-=.06}if(alpha<=0){ctx.clearRect(0,0,cv.width,cv.height);return}af=requestAnimationFrame(draw)}
   if(af)cancelAnimationFrame(af);draw()
 }
@@ -2949,93 +2950,7 @@ async function uploadAvatar(input){
 /* ══════════════════════════════════════════════════════
    BUG REPORT → DISCORD WEBHOOK
 ══════════════════════════════════════════════════════ */
-function openBugReport(){
-  if(!AUTH.user){toast({title:'Login required',sub:'Please log in to report bugs',type:'w',dur:2500});return;}
-  document.getElementById('bug-modal-overlay').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeBugReport(event){
-  if(event&&event.target!==event.currentTarget)return;
-  document.getElementById('bug-modal-overlay').classList.remove('open');
-  document.body.style.overflow='';
-  /* Reset form */
-  setTimeout(()=>{
-    document.getElementById('bug-title-input').value='';
-    document.getElementById('bug-desc').value='';
-    document.getElementById('bug-screenshot').value='';
-    document.getElementById('bug-err').classList.remove('vis');
-    document.getElementById('bug-send-btn').disabled=false;
-    document.getElementById('bug-send-btn').textContent='🐛 Send Report';
-  },300);
-}
-
-async function sendBugReport(){
-  const title=document.getElementById('bug-title-input').value.trim();
-  const desc=document.getElementById('bug-desc').value.trim();
-  const screenshot=document.getElementById('bug-screenshot').value.trim();
-  const category=document.getElementById('bug-category').value;
-  const errEl=document.getElementById('bug-err');
-  const btn=document.getElementById('bug-send-btn');
-  errEl.classList.remove('vis');
-
-  if(!title){errEl.textContent='Please enter a title.';errEl.classList.add('vis');return;}
-  if(!desc){errEl.textContent='Please describe the bug.';errEl.classList.add('vis');return;}
-
-  btn.disabled=true;btn.textContent='Sending...';
-
-  try{
-    const ip=await getIP();
-    const browser=navigator.userAgent;
-    const page=window.location.href;
-    const ts=new Date().toISOString();
-    const categoryLabel={download:'📥 Download',login:'🔑 Login/Register',ui:'🎨 UI/Visual',performance:'⚡ Performance',other:'❓ Other'}[category]||category;
-
-    const embed={
-      title:`🐛 Bug Report — ${title}`,
-      color:0xff4f5e,
-      fields:[
-        {name:'👤 Reporter',value:`\`${AUTH.user.username}\``,inline:true},
-        {name:'📂 Category',value:categoryLabel,inline:true},
-        {name:'🌐 IP',value:`\`${ip}\``,inline:true},
-        {name:'📝 Description',value:desc.length>1000?desc.slice(0,1000)+'…':desc,inline:false},
-        {name:'🖥️ Browser',value:`\`${browser.slice(0,120)}\``,inline:false},
-        {name:'🔗 Page',value:page,inline:false},
-      ],
-      footer:{text:`Conch & Cmdr Bug Report • ${ts}`},
-      thumbnail:{url:'https://cdn.discordapp.com/emojis/1234567890.png'}
-    };
-    if(screenshot){embed.fields.push({name:'📸 Screenshot',value:screenshot,inline:false});}
-    if(AUTH.user.avatar_url){embed.thumbnail={url:AUTH.user.avatar_url};}
-
-    const res=await fetch(CONFIG.DISCORD_WEBHOOK,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({username:'Conch & Cmdr Bug Bot',embeds:[embed]})
-    });
-
-    if(res.ok||res.status===204){
-      /* Also save to Supabase for records */
-      await sbFetch('/rest/v1/cc_bug_reports',{
-        method:'POST',headers:{'Prefer':'return=minimal'},
-        body:JSON.stringify({username:AUTH.user.username,user_id:AUTH.user.id||null,title,description:desc,category,screenshot_url:screenshot||null,ip,browser,page,created_at:ts})
-      }).catch(()=>{});/* Supabase table optional — webhook is primary */
-
-      document.getElementById('bug-modal-content').innerHTML=`
-        <div style="text-align:center;padding:1.5rem 1rem">
-          <div style="font-size:2.5rem;margin-bottom:.75rem">✅</div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.4rem">Report sent!</div>
-          <div style="font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-bottom:1.5rem">Your bug report has been sent to Discord. Thank you!</div>
-          <button class="bug-btn bug-btn-send" onclick="closeBugReport()" style="max-width:200px;margin:0 auto;display:block">Close</button>
-        </div>`;
-      toast({title:'Bug reported!',sub:'Thank you for the feedback',type:'ok',dur:3000});
-    } else {
-      throw new Error('Webhook returned '+res.status);
-    }
-  }catch(e){
-    errEl.textContent='Failed to send report. Please try again.';errEl.classList.add('vis');
-    btn.disabled=false;btn.textContent='🐛 Send Report';
-  }
-}
+function openBugReport(){location.href='bugreport.html';}
 
 /* ══════════════════════════════════════════════════════
    EMAIL ON NEW RELEASE (checks GitHub, sends via Supabase Edge Function or direct)
@@ -3156,12 +3071,13 @@ async function checkAndNotifyRelease(releases){
 })();
 
 function megaConfetti(){
+  if(!window.CC_THEME.state().motion||localStorage.getItem('cc_confetti')==='0')return;
   const cv=document.getElementById('confetti-canvas'),ctx=cv.getContext('2d');
   cv.width=window.innerWidth;cv.height=window.innerHeight;
   const cols=['#0ff4c6','#ff4f5e','#ffc832','#64a0ff','#ff8c42','#a78bfa','#ff69b4','#00bfff'];
   const ps=Array.from({length:200},()=>({x:Math.random()*cv.width,y:-10-Math.random()*200,r:3+Math.random()*8,col:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*6,vy:2+Math.random()*6,rot:Math.random()*Math.PI*2,rv:(Math.random()-.5)*.3,sq:Math.random()>.5}));
   let af,alpha=1;
-  function draw(){ctx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.col;if(p.sq){ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r)}else{ctx.beginPath();ctx.arc(0,0,p.r/2,0,Math.PI*2);ctx.fill()}ctx.restore();p.x+=p.vx;p.y+=p.vy;p.rot+=p.rv;p.vy+=.08});
+  function draw(){ctx.clearRect(0,0,cv.width,cv.height);if(!window.CC_THEME.state().motion)return;ps.forEach(p=>{ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.col;if(p.sq){ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r)}else{ctx.beginPath();ctx.arc(0,0,p.r/2,0,Math.PI*2);ctx.fill()}ctx.restore();p.x+=p.vx;p.y+=p.vy;p.rot+=p.rv;p.vy+=.08});
   if(ps.every(p=>p.y>cv.height)){alpha-=.04}if(alpha<=0){ctx.clearRect(0,0,cv.width,cv.height);return}af=requestAnimationFrame(draw)}
   if(af)cancelAnimationFrame(af);draw();
 }

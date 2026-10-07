@@ -207,9 +207,13 @@ window.CC_CONFIG = {
     try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
   };
   const media = window.matchMedia('(prefers-color-scheme: light)');
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   function state() {
     return {
       glass: read('cc_liquid_glass','0') === '1',
+      glassStrength: read('cc_glass_strength','strong') === 'subtle' ? 'subtle' : 'strong',
+      reduceMotion: read('cc_reduce_motion','0') === '1',
+      motion: read('cc_animations','1') !== '0' && read('cc_reduce_motion','0') !== '1' && !reducedMotion.matches,
       mode: read('cc_theme','dark') === 'light' ? 'light' : 'dark',
       system: read('cc_system_theme','0') === '1',
       accent: /^#[0-9a-f]{6}$/i.test(read('cc_accent','')) ? read('cc_accent','') : '#0ff4c6'
@@ -223,7 +227,7 @@ window.CC_CONFIG = {
       --surface2:rgba(255,255,255,.06)!important;--border:rgba(239,246,255,.16)!important;
       --text:#f2f3ff!important;--muted:#a0a7b1!important;
       --glass-panel:rgba(34,38,44,.48);--glass-input:rgba(8,12,17,.34);--glass-control:rgba(238,244,255,.085);
-      --glass-blur:20px;--glass-shine:rgba(255,255,255,.28);--glass-energy:0;--glass-x:35%;--glass-y:0%;
+      --glass-blur:28px;--glass-optics-blur:18px;--glass-saturation:180%;--glass-shine:rgba(255,255,255,.28);--glass-energy:0;--glass-x:35%;--glass-y:0%;
       --glass-rim:rgba(238,246,255,.20);--glass-shadow:0 20px 60px rgba(0,0,0,.24),0 3px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.30),inset 1px 0 0 rgba(255,255,255,.05),inset -1px -1px 0 rgba(210,236,255,.035);
       --glass-bg:radial-gradient(ellipse 760px 640px at 4% 2%,color-mix(in srgb,var(--conch) 38%,transparent),transparent 72%),radial-gradient(ellipse 430px 320px at 43% 55%,color-mix(in srgb,var(--conch) 17%,transparent),transparent 72%),radial-gradient(ellipse 480px 440px at 74% 37%,rgba(115,53,212,.30),transparent 72%),radial-gradient(ellipse 490px 390px at 68% 66%,rgba(185,37,112,.21),transparent 72%),radial-gradient(ellipse 610px 550px at 101% 94%,rgba(213,63,79,.36),transparent 73%),linear-gradient(#06090b,#05080a);
     }
@@ -238,10 +242,10 @@ window.CC_CONFIG = {
     html.liquid-glass body,html.liquid-glass #auth-wall {
       background:var(--glass-bg)!important;background-attachment:fixed!important;color:var(--text);
     }
-    html.liquid-glass :is(nav,.topnav,.sidebar,.drawer,.auth-box,.settings-section,.file-card,.showcase-card,.peek-card,.quiz-card,.legal-card,.feature-card,.cmd-card,.release-card,.ann-card,.status-card,.form-card,.success-card,.faq-item,.modal-box,.obox,.intro-box,.profile-modal,.bug-modal,.email-modal,.fav-modal,.msg-modal,.addfriend-modal,.queue-panel,.notif-panel,.toast,.save-toast,.q-panel,.q-thread,.q-post,.cc-theme-picker) {
+    html.liquid-glass :is(nav,.topnav,.sidebar,.drawer,.auth-box,.settings-section,.file-card,.showcase-card,.peek-card,.quiz-card,.legal-card,.feature-card,.cmd-card,.release-card,.ann-card,.status-card,.form-card,.success-card,.report-panel,.report-row,.faq-item,.modal-box,.obox,.intro-box,.profile-modal,.bug-modal,.email-modal,.fav-modal,.msg-modal,.addfriend-modal,.queue-panel,.notif-panel,.toast,.save-toast,.q-panel,.q-thread,.q-post,.cc-theme-picker) {
       background:var(--glass-panel)!important;border-color:var(--glass-rim)!important;
       box-shadow:var(--glass-shadow)!important;
-      -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+      -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation));backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation));
     }
     html.liquid-glass :is(.auth-box,.settings-section,.file-card,.showcase-card,.feature-card,.q-thread,.q-panel,.q-post,.cc-theme-picker) {
       background-image:radial-gradient(ellipse at var(--glass-x) var(--glass-y),rgba(255,255,255,var(--glass-energy)),transparent 62%),linear-gradient(145deg,rgba(255,255,255,.055),transparent 36%,rgba(199,232,255,.015) 75%,rgba(255,255,255,.035))!important;
@@ -295,7 +299,7 @@ window.CC_CONFIG = {
     html.liquid-glass[data-cc-page="index"] .hero-tag{background:color-mix(in srgb,var(--conch) 6%,transparent);border-color:color-mix(in srgb,var(--conch) 36%,transparent);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--conch) 12%,transparent),0 0 24px color-mix(in srgb,var(--conch) 6%,transparent)}
     html.liquid-glass[data-cc-page="index"] .showcase-card{padding:2rem 1.5rem}
     @supports(backdrop-filter:url("#cc-glass-refraction")){
-      html.liquid-glass :is(.cc-theme-picker,.q-compose,.cc-theme-trigger,.q-button,.cc-theme-choice){backdrop-filter:blur(14px) saturate(150%) url("#cc-glass-refraction")}
+      html.liquid-glass :is(.cc-theme-picker,.q-compose,.cc-theme-trigger,.q-button,.cc-theme-choice){backdrop-filter:blur(var(--glass-optics-blur)) saturate(var(--glass-saturation)) url("#cc-glass-refraction")}
     }
     html.liquid-glass :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),textarea,select,.ver-history,.msg-input) {
       background:var(--glass-input)!important;border-color:var(--border)!important;color:var(--text)!important;
@@ -338,12 +342,17 @@ window.CC_CONFIG = {
     .cc-theme-custom{display:flex;align-items:center;gap:.75rem;font-size:.8rem;margin:1rem 0}
     .cc-theme-custom input{width:38px;height:30px;padding:2px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer}
     .cc-theme-done{width:100%;padding:.7rem;border:1px solid var(--conch);border-radius:10px;background:var(--surface2);color:var(--text);font:inherit;cursor:pointer}
+    :root.liquid-glass[data-glass-strength="subtle"]{--glass-blur:12px;--glass-optics-blur:9px;--glass-saturation:115%;--glass-panel:rgba(27,31,38,.78);--glass-input:rgba(10,14,20,.60);--glass-control:rgba(230,240,255,.06);--glass-rim:rgba(238,246,255,.12);--glass-shine:rgba(255,255,255,.16);--glass-shadow:0 10px 30px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.16)}
+    :root.liquid-glass.light-mode[data-glass-strength="subtle"]{--glass-panel:rgba(255,255,255,.78);--glass-input:rgba(255,255,255,.70);--glass-control:rgba(255,255,255,.58);--glass-rim:rgba(255,255,255,.65);--glass-shine:rgba(255,255,255,.65);--glass-shadow:0 10px 30px rgba(35,71,111,.08),inset 0 1px 0 rgba(255,255,255,.7)}
+    html.liquid-glass[data-glass-strength="subtle"] :is(.settings-section,.q-thread,.q-post,.q-toolbar,.auth-box,.showcase-card,.feature-card,.file-card,.cc-theme-picker,.q-compose)::after{opacity:.28}
+    html.liquid-glass[data-glass-strength="subtle"] .cc-glass-lit{--glass-energy:.035}
     @supports not (backdrop-filter:blur(1px)) {
-      :root.liquid-glass{--glass-panel:#1b1f25;--glass-input:#101419;--glass-control:#252b33}
-      :root.liquid-glass.light-mode{--glass-panel:#f2f7fd;--glass-input:#fff;--glass-control:#f2f7fd}
+      :root.liquid-glass[data-glass-strength]{--glass-panel:#1b1f25;--glass-input:#101419;--glass-control:#252b33}
+      :root.liquid-glass.light-mode[data-glass-strength]{--glass-panel:#f2f7fd;--glass-input:#fff;--glass-control:#f2f7fd}
     }
     @media(max-width:640px) {
-      :root.liquid-glass{--glass-blur:14px}
+      :root.liquid-glass{--glass-blur:18px;--glass-optics-blur:14px}
+      :root.liquid-glass[data-glass-strength="subtle"]{--glass-blur:9px;--glass-optics-blur:7px}
       html.liquid-glass body,html.liquid-glass #auth-wall{background-attachment:scroll!important}
       html.liquid-glass nav{top:10px;width:calc(100% - 20px);height:56px;padding:8px 14px}
       html.liquid-glass .q-page{padding-top:6.8rem}
@@ -365,14 +374,16 @@ window.CC_CONFIG = {
       html.liquid-glass[data-cc-page="index"] .nav-login{display:none}
     }
     @media(prefers-reduced-transparency:reduce) {
-      :root.liquid-glass{--glass-panel:#1b1f25;--glass-input:#101419;--glass-control:#252b33}
-      :root.liquid-glass.light-mode{--glass-panel:#f2f7fd;--glass-input:#fff;--glass-control:#f2f7fd}
+      :root.liquid-glass[data-glass-strength]{--glass-panel:#1b1f25;--glass-input:#101419;--glass-control:#252b33}
+      :root.liquid-glass.light-mode[data-glass-strength]{--glass-panel:#f2f7fd;--glass-input:#fff;--glass-control:#f2f7fd}
       html.liquid-glass :is(nav,.drawer,.auth-box,.settings-section,.file-card,.q-panel,.q-thread,.cc-theme-picker,.q-compose,.q-button,.cc-theme-trigger,.cc-theme-choice){backdrop-filter:none!important}
     }
     @media(prefers-reduced-motion:reduce) {
-      html.liquid-glass *,html.liquid-glass *::before,html.liquid-glass *::after{animation:none!important;transition:none!important}
+      html.liquid-glass *,html.liquid-glass *::before,html.liquid-glass *::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important;scroll-behavior:auto!important}
     }
-    html.cc-no-motion *,html.cc-no-motion *::before,html.cc-no-motion *::after{animation:none!important;transition:none!important}
+    html.cc-no-motion *,html.cc-no-motion *::before,html.cc-no-motion *::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important;scroll-behavior:auto!important}
+    html.cc-no-motion :is(.seasonal-banner,.seasonal-particle,.seasonal-anniversary-card,.seasonal-anniversary-toast){animation:none!important}
+    html.cc-no-motion :is(.file-card,.q-thread):hover,html.cc-no-motion :is(.q-button,.cc-theme-trigger,.connected-save-btn,.cc-theme-choice,.cc-theme-modes button,.cc-theme-done,.btn-primary,.btn-secondary,.nav-login,.nav-cta):active{transform:none!important}
   `;
   document.head.appendChild(style);
   // Displace only the backdrop. Text and controls are rendered above the lens.
@@ -384,7 +395,6 @@ window.CC_CONFIG = {
     optics.innerHTML='<defs><filter id="cc-glass-refraction" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="1" seed="3" result="lens"/><feDisplacementMap in="SourceGraphic" in2="lens" scale="4" xChannelSelector="R" yChannelSelector="G"/></filter></defs>';
     document.body.appendChild(optics);
   }
-  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   let lit=null,lightingFrame=0;
   function clearLight(){if(lit){lit.classList.remove('cc-glass-lit');lit.style.removeProperty('--glass-x');lit.style.removeProperty('--glass-y');lit=null;}}
   document.addEventListener('pointermove',event=>{
@@ -401,9 +411,11 @@ window.CC_CONFIG = {
   function apply() {
     const s = state();
     root.classList.toggle('liquid-glass',s.glass);
-    if(!s.glass)clearLight();
+    root.dataset.glassStrength=s.glassStrength;
+    if(!s.glass||!s.motion){if(lightingFrame)cancelAnimationFrame(lightingFrame);lightingFrame=0;clearLight();}
     root.classList.toggle('light-mode',s.system ? media.matches : s.mode === 'light');
-    root.classList.toggle('cc-no-motion',read('cc_animations','1') === '0');
+    root.classList.toggle('cc-no-motion',!s.motion);
+    document.querySelector('#cc-glass-refraction feDisplacementMap')?.setAttribute('scale',s.glassStrength==='subtle'?'1':'4');
     root.style.setProperty('--conch',s.accent);
     const channels=s.accent.slice(1).match(/../g).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));
     root.style.setProperty('--glass-accent-ink',channels[0]*.2126+channels[1]*.7152+channels[2]*.0722>.32?'#04120e':'#fff');
@@ -470,7 +482,8 @@ window.CC_CONFIG = {
   }
   window.CC_THEME={state,apply,set,openPicker,colorCSS(value){const el=document.createElement('span');el.style.color=value;return el.style.color;}};
   media.addEventListener('change',()=>{if(state().system)apply();});
-  window.addEventListener('storage',event=>{if(event.key===null||['cc_theme','cc_system_theme','cc_liquid_glass','cc_accent','cc_animations'].includes(event.key))apply();});
+  reducedMotion.addEventListener('change',apply);
+  window.addEventListener('storage',event=>{if(event.key===null||['cc_theme','cc_system_theme','cc_liquid_glass','cc_accent','cc_animations','cc_glass_strength','cc_reduce_motion'].includes(event.key))apply();});
   apply();
   document.addEventListener('DOMContentLoaded',()=>{
     addLens();apply();
