@@ -178,6 +178,8 @@ footer{text-align:center;padding:2rem;font-family:var(--mono);font-size:.7rem;co
 })();
 </script>
 <script src="i18n.js"></script>
+<script src="config.js"></script>
+<script src="community.js"></script>
 </head>
 <body>
 
@@ -192,8 +194,8 @@ footer{text-align:center;padding:2rem;font-family:var(--mono);font-size:.7rem;co
 <footer>Conch & Cmdr — Profiles · <span onclick="startSnake()" style="cursor:pointer;opacity:.4;transition:opacity .2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'" title="🐍">🐍</span></footer>
 
 <script>
-const SB_URL='https://rmdkoauibmzhgnvrwhfd.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZGtvYXVpYm16aGdudnJ3aGZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjg2MDksImV4cCI6MjA5Mzg0NDYwOX0.lu6T00f9y9-Q8HhVag-MGjJz6bTlJrYUwC7AApIxaFw';
+const SB_URL=window.CC_CONFIG.SB_URL;
+const SB_KEY=window.CC_CONFIG.SB_KEY;
 const ADMIN_USERNAME='max';
 
 /* ── THEME ── */
@@ -336,25 +338,17 @@ async function showSingleProfile(username){
     const loggedIn=getLoggedInUser();
     const isOwnProfile=loggedIn&&(loggedIn.id===user.id||(loggedIn.rawUsername||loggedIn.username||'').toLowerCase()===user.username.toLowerCase());
 
-    /* Fetch stats, follows in parallel */
-    const [commR,reactR,follR,flingR]=await Promise.all([
-      sb(`/rest/v1/cc_comments?user_id=eq.${user.id}&select=id`),
-      sb(`/rest/v1/cc_reactions?user_id=eq.${user.id}&select=id`),
-      sb(`/rest/v1/cc_follows?following_id=eq.${user.id}&select=follower_id`),
-      sb(`/rest/v1/cc_follows?follower_id=eq.${user.id}&select=following_id`)
+    /* Counts and follow state come from the same verified service. */
+    const [commR,reactR,followResult]=await Promise.all([
+      sb('/rest/v1/cc_comments?user_id=eq.'+encodeURIComponent(user.id)+'&select=id'),
+      sb('/rest/v1/cc_reactions?user_id=eq.'+encodeURIComponent(user.id)+'&select=id'),
+      window.CC_SOCIAL.followStats(user.id).then(value=>({value}),error=>({error}))
     ]);
     const comments=commR.ok?(await commR.json()).length:0;
     const reactions=reactR.ok?(await reactR.json()).length:0;
-    const followersData=follR.ok?await follR.json():[];
-    const followingData=flingR.ok?await flingR.json():[];
-    const followersCount=followersData.length;
-    const followingCount=followingData.length;
-
-    /* Check if logged-in user is following */
-    let isFollowing=false;
-    if(loggedIn&&!isOwnProfile){
-      isFollowing=followersData.some(f=>f.follower_id===loggedIn.id);
-    }
+    const followersCount=followResult.value?.followers??'—';
+    const followingCount=followResult.value?.following??'—';
+    const isFollowing=!!followResult.value?.is_following;
 
     document.title=`${displayName} — Conch & Cmdr`;
 
@@ -382,8 +376,8 @@ async function showSingleProfile(username){
           </div>
           <div class="profile-divider"></div>
           <div class="follow-stats">
-            <div style="text-align:center"><strong id="followers-count-val" style="font-size:1.1rem;color:var(--text);display:block">${followersCount}</strong>Followers</div>
-            <div style="text-align:center"><strong style="font-size:1.1rem;color:var(--text);display:block">${followingCount}</strong>Following</div>
+            <div style="text-align:center"><strong id="followers-count-val" style="font-size:1.1rem;color:var(--text);display:block">${followersCount}</strong><span data-t="followers">${eh(t('followers'))}</span></div>
+            <div style="text-align:center"><strong style="font-size:1.1rem;color:var(--text);display:block">${followingCount}</strong><span data-t="following_count">${eh(t('following_count'))}</span></div>
           </div>
           <div class="profile-stats">
             <div class="stat-box"><div class="stat-box-value">${comments}</div><div class="stat-box-label">Comments</div></div>
@@ -391,8 +385,9 @@ async function showSingleProfile(username){
           </div>
           <div class="profile-actions">
             <button class="profile-action-btn" onclick="copyLink()">🔗 Copy Link</button>
-            ${!isOwnProfile&&loggedIn?`<button class="follow-btn${isFollowing?' following':''}" id="follow-btn" onclick="toggleFollow()">${isFollowing?'✓ Following':'+ Follow'}</button>`:''}
+            ${!isOwnProfile&&loggedIn?`<button class="follow-btn${isFollowing?' following':''}" id="follow-btn" aria-pressed="${isFollowing}" onclick="toggleFollow()">${eh((isFollowing?'✓ ':'+ ')+t(isFollowing?'following':'follow'))}</button>`:''}
           </div>
+          <p class="profile-follow-error" id="profile-follow-error" role="alert" ${followResult.error?'':'hidden'}>${followResult.error?eh(followResult.error.message):''}</p>
         </div>
       </div>
     </div></div>`);
@@ -409,49 +404,22 @@ function copyLink(){
 }
 
 async function toggleFollow(){
-  const loggedIn=getLoggedInUser();
-  if(!loggedIn||!_profileUser)return;
-  /* Ensure we have loggedIn.id */
-  const myId=loggedIn.id;
-  if(!myId){return;}
-  const btn=document.getElementById('follow-btn');
-  if(!btn)return;
-  const isFollowing=btn.classList.contains('following');
-  btn.disabled=true;
+  const loggedIn=getLoggedInUser(),btn=document.getElementById('follow-btn'),error=document.getElementById('profile-follow-error');
+  if(!loggedIn||!_profileUser||!btn||btn.disabled)return;
+  const targetId=_profileUser.id,enabled=!btn.classList.contains('following');
+  btn.disabled=true;if(error)error.hidden=true;
   try{
-    if(isFollowing){
-      const dr=await sb(`/rest/v1/cc_follows?follower_id=eq.${myId}&following_id=eq.${_profileUser.id}`,{method:'DELETE'});
-      if(dr.ok||dr.status===200||dr.status===204){
-        btn.classList.remove('following');
-        btn.textContent='+ Follow';
-      }
-    }else{
-      const pr=await sb('/rest/v1/cc_follows',{
-        method:'POST',
-        headers:{'Prefer':'return=minimal'},
-        body:JSON.stringify({
-          follower_id:myId,
-          follower_username:loggedIn.username||loggedIn.rawUsername,
-          following_id:_profileUser.id,
-          following_username:_profileUser.display_name||_profileUser.username,
-          created_at:new Date().toISOString()
-        })
-      });
-      if(pr.ok||pr.status===201||pr.status===204){
-        btn.classList.add('following');
-        btn.textContent='✓ Following';
-      }
-    }
-    /* Refresh follower count */
-    const r=await sb(`/rest/v1/cc_follows?following_id=eq.${_profileUser.id}&select=id`);
-    if(r.ok){
-      const data=await r.json();
-      const fc=document.getElementById('followers-count-val');
-      if(fc)fc.textContent=data.length;
-    }
-  }catch(e){console.error('Follow error:',e);}
-  btn.disabled=false;
+    const result=await window.CC_SOCIAL.follow(targetId,enabled);
+    if(_profileUser.id!==targetId)return;
+    btn.classList.toggle('following',result.is_following);btn.setAttribute('aria-pressed',String(result.is_following));
+    btn.textContent=(result.is_following?'✓ ':'+ ')+t(result.is_following?'following':'follow');
+    document.getElementById('followers-count-val').textContent=result.followers;
+  }catch(e){if(error){error.textContent=e.message;error.hidden=false;}}
+  finally{btn.disabled=false;}
 }
+window.addEventListener('cc:language-change',()=>{
+  const btn=document.getElementById('follow-btn');if(btn)btn.textContent=(btn.classList.contains('following')?'✓ ':'+ ')+t(btn.classList.contains('following')?'following':'follow');
+});
 
 /* ══ SNAKE EASTER EGG ══ */
 let snakeInterval=null;

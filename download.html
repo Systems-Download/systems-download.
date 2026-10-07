@@ -789,6 +789,7 @@
 </script>
 <script src="i18n.js"></script>
 <script src="config.js"></script>
+<script src="community.js"></script>
 <script src="cc-errors.js"></script>
 </head>
 <body>
@@ -1918,7 +1919,7 @@ async function initAuth(){
 ═══════════════════════════════════════════ */
 let _dopen=false;
 function toggleDrawer(){_dopen?closeDrawer():openDrawer();}
-function openDrawer(){_dopen=true;['drawer','drawer-overlay','burger-btn'].forEach(id=>document.getElementById(id).classList.add('open'));document.body.style.overflow='hidden'}
+function openDrawer(){_dopen=true;['drawer','drawer-overlay','burger-btn'].forEach(id=>document.getElementById(id).classList.add('open'));document.body.style.overflow='hidden';closeNotifDropdown();}
 function copyInviteLink(){
   const link='https://systems-download.github.io';
   navigator.clipboard.writeText(link).then(()=>{
@@ -2886,7 +2887,7 @@ async function uploadAvatar(input){
   if(!input.files||!input.files[0])return;
   if(!AUTH.user||!AUTH.user.id){toast({title:'Not logged in',sub:'',type:'w',dur:2000});return;}
   const file=input.files[0];
-  if(file.size>2*1024*1024){toast({title:'File too large',sub:'Max 2MB',type:'w',dur:3000});return;}
+  if(file.size>3*1024*1024){toast({title:'File too large',sub:t('avatar_limit'),type:'w',dur:3000});return;}
   if(!file.type.startsWith('image/')){toast({title:'Invalid file type',sub:'Images only',type:'w',dur:3000});return;}
 
   const prog=document.getElementById('avatar-progress');
@@ -3108,46 +3109,15 @@ function fbCopy(t){
 /* ══════════════════════════════════════════════════════
    FOLLOWER SYSTEM
 ══════════════════════════════════════════════════════ */
-async function followUser(targetId, targetUsername, btn){
-  if(!AUTH.user){toast({title:'Login required',sub:'',type:'w',dur:2000});return;}
-  if(AUTH.user.id===targetId)return;
-
-  const isFollowing=btn.classList.contains('following');
-  btn.disabled=true;
-
-  try{
-    if(isFollowing){
-      /* Unfollow */
-      await sbFetch(`/rest/v1/cc_follows?follower_id=eq.${AUTH.user.id}&following_id=eq.${targetId}`,{method:'DELETE'});
-      btn.classList.remove('following');
-      btn.textContent='+ Follow';
-      toast({title:'Unfollowed '+targetUsername,sub:'',type:'i',dur:2000});
-    }else{
-      /* Follow */
-      await sbFetch('/rest/v1/cc_follows',{
-        method:'POST',headers:{'Prefer':'return=minimal'},
-        body:JSON.stringify({follower_id:AUTH.user.id,follower_username:AUTH.user.username,following_id:targetId,following_username:targetUsername,created_at:new Date().toISOString()})
-      });
-      btn.classList.add('following');
-      btn.textContent='✓ Following';
-      toast({title:'Now following '+targetUsername,sub:'',type:'ok',dur:2000});
-    }
-  }catch(e){
-    toast({title:'Failed',sub:'',type:'w',dur:2000});
-  }
-  btn.disabled=false;
+async function followUser(targetId,targetUsername,btn){
+  if(!AUTH.user){toast({title:t('community_sign_in'),type:'w',dur:3000});return;}
+  if(btn.disabled)return;btn.disabled=true;
+  try{const result=await window.CC_SOCIAL.follow(targetId,!btn.classList.contains('following'));btn.classList.toggle('following',result.is_following);btn.setAttribute('aria-pressed',String(result.is_following));btn.textContent=(result.is_following?'✓ ':'+ ')+t(result.is_following?'following':'follow');toast({title:t('follow_saved'),type:'ok',dur:2000});}
+  catch(e){toast({title:t('community_failed'),sub:e.message,type:'w',dur:4000});}finally{btn.disabled=false;}
 }
-
-async function checkFollowStatus(targetId, btn){
+async function checkFollowStatus(targetId,btn){
   if(!AUTH.user||!targetId)return;
-  try{
-    const r=await sbFetch(`/rest/v1/cc_follows?follower_id=eq.${AUTH.user.id}&following_id=eq.${targetId}&select=id`);
-    const rows=r.ok?await r.json():[];
-    if(rows&&rows.length>0){
-      btn.classList.add('following');
-      btn.textContent='✓ Following';
-    }
-  }catch{}
+  try{const result=await window.CC_SOCIAL.followStats(targetId);btn.classList.toggle('following',result.is_following);btn.setAttribute('aria-pressed',String(result.is_following));btn.textContent=(result.is_following?'✓ ':'+ ')+t(result.is_following?'following':'follow');}catch{}
 }
 
 
@@ -3634,7 +3604,7 @@ async function initNotifications(){
   if(!AUTH.user)return;
   if(_notifUser!==AUTH.user.id){_notifs=[];_notifUser=AUTH.user.id;renderNotifs();updateBadge();}
   document.getElementById('notif-bell-wrap').classList.add('vis');
-  await Promise.all([checkNewReleases(),checkAdminMessages(),checkFriendRequestNotifs()]);
+  await Promise.all([checkNewReleases(),checkAdminMessages(),checkFriendRequestNotifs(),window.CC_SOCIAL.refresh().catch(()=>{})]);
 }
 
 async function checkFriendRequestNotifs(){
@@ -3724,34 +3694,49 @@ async function checkNewReleases(snapshot){
   }catch{}
 }
 
+window.addEventListener('cc:community-notifications',event=>{
+  const userId=AUTH.user?.id;if(!userId)return;
+  mergeNotifications('community',event.detail.groups.map(g=>({
+    id:'community-'+g.thread_id,source:'community',group:g,threadId:g.thread_id,icon:g.mention_count?'＠':'💬',title:g.title,
+    desc:window.CC_SOCIAL.description(g),time:g.created_at,unread:g.unread_count>0,url:'questions.html#'+g.thread_id
+  })),userId);
+});
+
 function renderNotifs(){
-  const list=document.getElementById('notif-list');
-  if(!_notifs.length){
-    list.innerHTML=`<div class="notif-empty">${eh(t('no_notifications'))}</div>`;
-    return;
+  const list=document.getElementById('notif-list');list.replaceChildren();
+  if(!_notifs.length){const empty=document.createElement('div');empty.className='notif-empty';empty.textContent=t('no_notifications');list.append(empty);return;}
+  // Repeated announcements share a row while keeping every message accessible.
+  const rows=[];
+  for(const n of _notifs){
+    const key=n.source==='admin'?'admin:'+n.title.toLowerCase().trim():String(n.id);
+    let group=rows.find(row=>row.key===key);if(group)group.items.push(n);else rows.push({key,items:[n]});
   }
-  list.innerHTML=_notifs.map(n=>`
-    <div class="notif-item${n.unread?' unread':''}"${n.url?` role="link" tabindex="0" onclick="openNotif('${ea(n.url)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotif('${ea(n.url)}')}"`:''}>
-      ${n.unread?'<div class="notif-item-dot"></div>':''}
-      <div class="notif-item-icon">${n.icon}</div>
-      <div class="notif-item-body">
-        <div class="notif-item-title">${eh(n.source==='freq'?t('friend_request',n.fromUsername):n.source==='release'?t('new_release',n.releaseType,n.releaseTag):n.title)}</div>
-        <div class="notif-item-desc">${eh(n.source==='freq'?t('friend_request_desc'):n.source==='release'?t('files_available',n.assetCount):n.desc)}</div>
-        <div class="notif-item-time">${timeAgoShort(n.time)}</div>
-      </div>
-    </div>`).join('');
+  for(const row of rows){
+    const n=row.items[0],unread=row.items.some(item=>item.unread),el=document.createElement(row.items.length>1?'details':'div');
+    el.className='notif-item'+(unread?' unread':'');
+    const content=row.items.length>1?document.createElement('summary'):el;if(content!==el)el.append(content);
+    if(unread){const dot=document.createElement('div');dot.className='notif-item-dot';content.append(dot);}
+    const icon=document.createElement('div');icon.className='notif-item-icon';icon.textContent=n.icon;
+    const body=document.createElement('div');body.className='notif-item-body';
+    const title=document.createElement('div');title.className='notif-item-title';title.textContent=n.source==='freq'?t('friend_request',n.fromUsername):n.source==='release'?t('new_release',n.releaseType,n.releaseTag):n.title;
+    const desc=document.createElement('div');desc.className='notif-item-desc';desc.textContent=n.source==='freq'?t('friend_request_desc'):n.source==='release'?t('files_available',n.assetCount):n.source==='community'?window.CC_SOCIAL.description(n.group):n.desc;
+    const time=document.createElement('div');time.className='notif-item-time';time.textContent=(row.items.length>1?t('notif_group_count',row.items.length)+' · ':'')+timeAgoShort(n.time);
+    body.append(title,desc,time);content.append(icon,body);
+    if(n.url){el.setAttribute('role','link');el.tabIndex=0;el.onclick=()=>void openNotif(n.url,n.threadId);el.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();void openNotif(n.url,n.threadId);}};}
+    if(row.items.length>1){const history=document.createElement('div');history.className='notif-group-history';for(const item of row.items){const message=document.createElement('p');message.textContent=item.desc+' · '+timeAgoShort(item.time);history.append(message);}el.append(history);}
+    list.append(el);
+  }
 }
 
-function openNotif(url){
-  if(url){
-    if(url.startsWith('messages')){window.location.href=url;}
-    else{const el=document.querySelector(url);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
-  }
+async function openNotif(url,threadId){
+  if(threadId){try{await window.CC_SOCIAL.markRead(threadId);}catch{}}
   closeNotifDropdown();
+  if(/^(messages|questions)\.html(?:[?#]|$)/.test(url||'')){location.href=url;}
+  else if(/^#[a-z0-9_-]+$/i.test(url||'')){document.querySelector(url)?.scrollIntoView({behavior:window.CC_THEME.state().motion?'smooth':'instant',block:'start'});}
 }
 
 function updateBadge(){
-  const unread=_notifs.filter(n=>n.unread).length;
+  const unread=new Set(_notifs.filter(n=>n.unread).map(n=>n.source==='admin'?'admin:'+n.title.toLowerCase().trim():String(n.id))).size;
   const badge=document.getElementById('notif-badge');
   if(unread>0){
     badge.style.display='flex';
@@ -3795,7 +3780,7 @@ function closeNotifDropdown(){
   document.getElementById('notif-bell').setAttribute('aria-expanded','false');
 }
 
-function markAllRead(){
+async function markAllRead(){
   const lastSeenKey='cc_last_seen_release_'+(AUTH.user.id||'anon');
   const seenKey='cc_seen_msgs_'+(AUTH.user.id||'anon');
   const freqKey='cc_seen_freqs_'+(AUTH.user.id||'anon');
@@ -3805,7 +3790,8 @@ function markAllRead(){
   if(releaseNotifs.length)localStorage.setItem(lastSeenKey,releaseNotifs[0].time);
   if(adminNotifs.length)localStorage.setItem(seenKey,JSON.stringify(adminNotifs.map(n=>n.id)));
   if(freqNotifs.length)localStorage.setItem(freqKey,JSON.stringify(freqNotifs.map(n=>n.id)));
-  _notifs=_notifs.map(n=>({...n,unread:false}));
+  _notifs=_notifs.map(n=>n.source==='community'?n:{...n,unread:false});
+  try{await window.CC_SOCIAL.markRead();}catch(e){toast({title:t('community_failed'),sub:e.message,type:'w',dur:3500});}
   renderNotifs();
   updateBadge();
   closeNotifDropdown();
@@ -4089,7 +4075,7 @@ initAuth().then(()=>{
             <span style="color:var(--text)">Size:</span> 256 × 256 px or larger<br>
             <span style="color:var(--text)">Ratio:</span> 1:1 (square)<br>
             <span style="color:var(--text)">Format:</span> JPG, PNG, WEBP<br>
-            <span style="color:var(--text)">Max:</span> 2 MB
+            <span style="color:var(--text)" data-t="avatar_limit">Maximum profile picture size: 3 MB</span>
           </div>
         </div>
         <div style="margin-top:.5rem;font-family:var(--mono);font-size:.63rem;color:var(--muted);opacity:.7">Non-square images will be cropped to a circle</div>

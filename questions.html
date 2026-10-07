@@ -71,7 +71,9 @@ textarea.q-input{resize:vertical;min-height:130px;line-height:1.65}
 @media(max-width:720px){.q-toolbar{grid-template-columns:1fr 1fr}.q-toolbar .q-search-label{grid-column:1/-1}.q-heading{align-items:flex-start;flex-direction:column}.q-page{padding:2rem 1rem 3rem}nav{padding:0 1rem}.q-banner{align-items:flex-start}.q-thread{padding:1rem}.q-post{padding:1rem}.q-nav-actions .q-back-label{display:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
+<script src="i18n.js"></script>
 <script src="config.js"></script>
+<script src="community.js"></script>
 </head>
 <body>
 <nav>
@@ -186,8 +188,10 @@ textarea.q-input{resize:vertical;min-height:130px;line-height:1.65}
     try {
       const data=await api.request('detail',{id,reply_offset:replyOffset});if(version!==detailVersion)return;
       activeThread=data.thread;replyCount=data.reply_count;
+      // Acknowledge only this discussion, using the server snapshot time.
+      void window.CC_SOCIAL.refresh().then(()=>window.CC_SOCIAL.markRead(id)).catch(()=>{});
       const post=make('article','q-post');const title=make('h2','',activeThread.title);title.tabIndex=-1;
-      post.append(title,badgeGroup(activeThread.tags,activeThread.owner_tags),metadata(activeThread.author,activeThread.created_at),make('div','q-body',activeThread.body));
+      post.append(title,badgeGroup(activeThread.tags,activeThread.owner_tags),metadata(activeThread.author,activeThread.created_at),window.CC_SOCIAL.renderBody(activeThread.body));
       if(activeThread.edited_at)post.appendChild(make('p','q-muted','Edited '+date(activeThread.edited_at)));
       if(activeThread.can_edit){
         const actions=make('div','q-tags');
@@ -206,7 +210,7 @@ textarea.q-input{resize:vertical;min-height:130px;line-height:1.65}
       }
       $('q-discussion').replaceChildren(post);$('q-replies').replaceChildren();$('q-replies-title').textContent=replyCount+' repl'+(replyCount===1?'y':'ies');
       data.replies.forEach(r=>{
-        const reply=make('article','q-post');reply.append(metadata(r.author,r.created_at,r.owner),make('div','q-body',r.body));
+        const reply=make('article','q-post');reply.append(metadata(r.author,r.created_at,r.owner),window.CC_SOCIAL.renderBody(r.body));
         if(r.edited_at)reply.appendChild(make('p','q-muted','Edited '+date(r.edited_at)));
         if(r.can_edit){
           const actions=make('div','q-tags'),edit=make('button','q-button','Edit reply'),remove=make('button','q-button','Delete reply');edit.type=remove.type='button';

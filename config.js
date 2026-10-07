@@ -386,6 +386,8 @@ window.CC_CONFIG = {
     html.cc-no-motion :is(.file-card,.q-thread):hover,html.cc-no-motion :is(.q-button,.cc-theme-trigger,.connected-save-btn,.cc-theme-choice,.cc-theme-modes button,.cc-theme-done,.btn-primary,.btn-secondary,.nav-login,.nav-cta):active{transform:none!important}
   `;
   document.head.appendChild(style);
+  const interfaceCSS=document.createElement('link');interfaceCSS.rel='stylesheet';interfaceCSS.href='interface.css';document.head.appendChild(interfaceCSS);
+  const interfaceScript=document.createElement('script');interfaceScript.src='interface.js';interfaceScript.async=false;interfaceScript.defer=true;document.head.appendChild(interfaceScript);
   // Displace only the backdrop. Text and controls are rendered above the lens.
   function addLens() {
     if(document.getElementById('cc-glass-optics'))return;
@@ -399,7 +401,7 @@ window.CC_CONFIG = {
   function clearLight(){if(lit){lit.classList.remove('cc-glass-lit');lit.style.removeProperty('--glass-x');lit.style.removeProperty('--glass-y');lit=null;}}
   document.addEventListener('pointermove',event=>{
     if(!root.classList.contains('liquid-glass')||root.classList.contains('cc-no-motion')||reducedMotion.matches||event.pointerType==='touch'){clearLight();return;}
-    const target=event.target.closest?.('.q-button,.cc-theme-choice,.cc-theme-modes button,.cc-theme-done,.cc-theme-picker,.settings-section,.q-thread,.q-post,.q-toolbar,.auth-box,.connected-save-btn,.showcase-card,.feature-card,.file-card,.btn-primary,.btn-secondary,.nav-login,.nav-cta');
+    const target=event.target.closest?.('nav,.drawer,.profile-card,.user-card,.cc-social-bell,.q-button,.cc-theme-choice,.cc-theme-modes button,.cc-theme-done,.cc-theme-picker,.settings-section,.q-thread,.q-post,.q-toolbar,.auth-box,.connected-save-btn,.showcase-card,.feature-card,.file-card,.btn-primary,.btn-secondary,.nav-login,.nav-cta');
     if(lightingFrame)cancelAnimationFrame(lightingFrame);
     lightingFrame=requestAnimationFrame(()=>{
       lightingFrame=0;if(lit!==target)clearLight();if(!target)return;
@@ -415,7 +417,7 @@ window.CC_CONFIG = {
     if(!s.glass||!s.motion){if(lightingFrame)cancelAnimationFrame(lightingFrame);lightingFrame=0;clearLight();}
     root.classList.toggle('light-mode',s.system ? media.matches : s.mode === 'light');
     root.classList.toggle('cc-no-motion',!s.motion);
-    document.querySelector('#cc-glass-refraction feDisplacementMap')?.setAttribute('scale',s.glassStrength==='subtle'?'1':'4');
+    document.querySelector('#cc-glass-refraction feDisplacementMap')?.setAttribute('scale',s.glassStrength==='subtle'?'3':'14');
     root.style.setProperty('--conch',s.accent);
     const channels=s.accent.slice(1).match(/../g).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));
     root.style.setProperty('--glass-accent-ink',channels[0]*.2126+channels[1]*.7152+channels[2]*.0722>.32?'#04120e':'#fff');
@@ -545,6 +547,7 @@ window.CC_CONFIG = {
     try {localStorage.setItem(key,JSON.stringify(session));} catch {
       throw new Error('Your browser could not save the Questions session.');
     }
+    window.dispatchEvent(new Event('cc:community-session'));
     return session;
   }
   function logout() {
